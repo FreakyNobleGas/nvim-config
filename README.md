@@ -15,6 +15,12 @@ To learn what a command does, you can search for it in the help menu. This only 
 Re-source a file after editing
 `:so`
 
+Use LSP functions such as find references or definition:
+`g` + another character such as `r`. (e.g. `gr` will search for all references for the highlighted symbol)
+
+To see which formatter is being used in the current buffer
+`:LazyFormatInfo`
+
 ### Configuration
 
 `.g` represents global config.
@@ -32,8 +38,7 @@ vim.opt.have_nerd_font = true
 Options for the lsp
 
 ```lua
-vim.diagnostic.
-```
+vim.diagnostic.* ```
 
 ### Keymaps
 
