@@ -6,3 +6,6 @@ brew install rg
 
 echo "Installing Go"
 brew install go
+
+echo "Installing zk"
+brew install zk

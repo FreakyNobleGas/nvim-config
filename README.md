@@ -38,7 +38,8 @@ vim.opt.have_nerd_font = true
 Options for the lsp
 
 ```lua
-vim.diagnostic.* ```
+vim.diagnostic.* 
+```
 
 ### Keymaps
 
@@ -97,8 +98,30 @@ Jump to previous x character
 Jump to next x character
 `fx`
 
+### Replace all strings in a file
+`:%s/old/new/g`
+
 ## Plugins
 
 ### Copilot
 
 Both `ai.copilot` and `ai.copilot-chat` need to be installed
+
+### How to disable a plugin
+
+In the plugin directory, you can disable a plugin like so:
+```lua
+return {
+  { "akinsho/bufferline.nvim", enabled = false },
+}
+```
+
+### Plugin Documentation
+
+`:help plugin-name`
+
+## General Notes
+
+LazyVim and Lazy.nvim are not the same thing. Lazy.nvim is strictly a plugin manager where LazyVim is a collection of plugins and configurations that ship together.
+
+In the Lazy.nvim dashboard view, Sync (S) is equivalent to install, clean, and update in a single action.
