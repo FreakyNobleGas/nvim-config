@@ -105,7 +105,10 @@ Jump to next x character
 
 ### Copilot
 
-Both `ai.copilot` and `ai.copilot-chat` need to be installed
+Both `ai.copilot` and `ai.copilot-chat` need to be installed for both auto-completion and chat features to work.
+
+If you experience an error similar to "model is not available", you can try logging out and back into Copilot.
+`:copilot signout` -> `:copilot signin`
 
 ### How to disable a plugin
 
@@ -119,6 +122,11 @@ return {
 ### Plugin Documentation
 
 `:help plugin-name`
+
+You can find the source code for the plugins here:
+`~/.local/share/nvim/lazy/`
+
+Generally, you can find the commands in the plugins folder.
 
 ## General Notes
 
