@@ -21,6 +21,15 @@ return {
           enabled = true,
         },
       },
+      vim.keymap.set("n", "<leader>zn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", { desc = "New ZK note" }),
+      vim.keymap.set("n", "<leader>zl", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", { desc = "List ZK notes" }),
+      vim.keymap.set(
+        "n",
+        "<leader>zf",
+        "<Cmd>ZkNotes { search = vim.fn.input('Search: ') }<CR>",
+        { desc = "Find ZK notes" }
+      ),
+      vim.keymap.set("n", "<leader>zt", "<Cmd>ZkTags<CR>", { desc = "List ZK tags" }),
     })
   end,
 }

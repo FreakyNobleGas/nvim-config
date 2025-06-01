@@ -133,3 +133,16 @@ Generally, you can find the commands in the plugins folder.
 LazyVim and Lazy.nvim are not the same thing. Lazy.nvim is strictly a plugin manager where LazyVim is a collection of plugins and configurations that ship together.
 
 In the Lazy.nvim dashboard view, Sync (S) is equivalent to install, clean, and update in a single action.
+
+### ZK Note Taking Tool
+
+Keymaps start with `<leader>z`.
+
+Search notes:
+`zk edit --interactive`
+
+Search notes by tag:
+`zk list --tag "someTag"`
+
+Link a note inside a note:
+`[[header_of_note_you_want_to_link]]`

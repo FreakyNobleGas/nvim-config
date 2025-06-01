@@ -9,3 +9,6 @@ brew install go
 
 echo "Installing zk"
 brew install zk
+
+echo "Installing fzf"
+brew install fzf
