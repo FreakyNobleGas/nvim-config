@@ -6,6 +6,8 @@
 --
 
 local HOME = os.getenv("HOME")
+vim.g.vim_svelte_plugin_load_full_syntax = 1
+vim.g.vim_svelte_plugin_use_typescript = 1
 return {
   "mfussenegger/nvim-lint",
   optional = true,
@@ -15,5 +17,9 @@ return {
         args = { "--config", HOME .. "/.markdownlint-cli2.yaml", "--" },
       },
     },
+  },
+  {
+    "leafOfTree/vim-svelte-plugin",
+    ft = { "svelte" },
   },
 }
