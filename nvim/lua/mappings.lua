@@ -14,6 +14,14 @@ map("n", "<leader>Q", "<cmd>qa!<CR>", { desc = "Force quit all (discard changes)
 -- Fuzzy finding
 map("n", "<leader><leader>", "<cmd>Telescope find_files<cr>", { desc = "Find files" })
 
+-- Window management
+map("n", "<leader>wv", "<cmd>vsplit<CR>", { desc = "Split window vertically" })
+map("n", "<leader>wh", "<cmd>split<CR>", { desc = "Split window horizontally" })
+map("n", "<leader>wd", "<cmd>close<CR>", { desc = "Delete/close window" })
+map("n", "<leader>w=", "<C-w>=", { desc = "Make windows equal size" })
+map("n", "<leader>|", "<cmd>vsplit<CR>", { desc = "Split window vertically" })
+map("n", "<leader>-", "<cmd>split<CR>", { desc = "Split window horizontally" })
+
 -- ZK Note-taking keymaps
 map("n", "<leader>zn", function()
   vim.ui.input({ prompt = "Note title: " }, function(title)
@@ -39,8 +47,12 @@ map({ "n", "x" }, "P", "<Plug>(YankyPutBefore)")
 map("n", "<c-n>", "<Plug>(YankyCycleForward)")
 map("n", "<c-p>", "<Plug>(YankyCycleBackward)")
 
--- Copilot Chat
-map("n", "<leader>cc", "<cmd>CopilotChatToggle<cr>", { desc = "Copilot Chat" })
+-- CodeCompanion AI Assistant
+map({ "n", "v" }, "<leader>ca", "<cmd>CodeCompanionActions<cr>", { desc = "CodeCompanion Actions" })
+map({ "n", "v" }, "<leader>cc", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "CodeCompanion Chat Toggle" })
+map("n", "<leader>cC", "<cmd>CodeCompanionChat<cr>", { desc = "CodeCompanion Chat New" })
+map("v", "<leader>cA", "<cmd>CodeCompanionChat Add<cr>", { desc = "CodeCompanion Add to Chat" })
+map({ "n", "v" }, "<leader>ci", "<cmd>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
 
 -- Buffer management keymaps (LazyVim-style)
 map("n", "<leader>bn", "<cmd>enew<CR>", { desc = "New buffer" })

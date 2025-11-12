@@ -1,4 +1,13 @@
 return {
+  -- Ensure which-key is ready when Neovim starts up
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    opts = {
+      preset = "helix",
+    },
+  },
+
   {
     "stevearc/conform.nvim",
     event = "BufWritePre",
@@ -137,20 +146,47 @@ return {
     },
   },
 
-  -- Copilot Chat
+  -- CodeCompanion AI Assistant
   {
-    "CopilotC-Nvim/CopilotChat.nvim",
+    "olimorris/codecompanion.nvim",
     dependencies = {
-      { "zbirenbaum/copilot.lua" },
-      { "nvim-lua/plenary.nvim" },
+      "nvim-lua/plenary.nvim",
+      "nvim-treesitter/nvim-treesitter",
+      "zbirenbaum/copilot.lua", -- For Copilot adapter
     },
-    build = "make tiktoken",
     cmd = {
-      "CopilotChat",
-      "CopilotChatOpen",
-      "CopilotChatToggle",
+      "CodeCompanion",
+      "CodeCompanionChat",
+      "CodeCompanionActions",
     },
-    opts = {},
+    opts = {
+      -- Set different default adapters per strategy
+      strategies = {
+        chat = {
+          adapter = "copilot", -- Use Copilot for chat by default
+        },
+        inline = {
+          adapter = "copilot", -- Use Copilot for inline edits
+        },
+        cmd = {
+          adapter = "copilot", -- Use Copilot for quick commands
+        },
+      },
+
+      -- Display options
+      display = {
+        chat = {
+          window = {
+            layout = "vertical", -- or "horizontal", "float"
+            width = 0.45,
+          },
+          start_in_insert_mode = true, -- Auto-enter insert mode when opening chat
+        },
+      },
+
+      -- Optional: Enable debug logging (change to "DEBUG" for troubleshooting)
+      log_level = "INFO",
+    },
   },
 
   -- Yanky for enhanced clipboard
