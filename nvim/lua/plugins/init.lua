@@ -12,6 +12,14 @@ return {
     end,
   },
 
+  -- nvim-tree file explorer
+  {
+    "nvim-tree/nvim-tree.lua",
+    opts = function()
+      return require "configs.nvim-tree"
+    end,
+  },
+
   -- Mason auto-installer
   {
     "williamboman/mason.nvim",
