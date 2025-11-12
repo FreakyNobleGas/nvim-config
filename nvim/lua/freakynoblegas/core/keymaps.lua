@@ -4,4 +4,5 @@ vim.g.mapleader = " "
 -- Sets the local leader key for mappings using <localleader>
 vim.g.maplocalleader = " "
 
-vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<cr>', { desc = 'Toggle nvim-tree' })
+-- Global keymaps
+vim.keymap.set('n', '<leader>q', '<cmd>quit<CR>', { desc = 'Quit' })
