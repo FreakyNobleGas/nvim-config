@@ -11,6 +11,9 @@ map("i", "jk", "<ESC>")
 map("n", "<leader>q", "<cmd>qa<CR>", { desc = "Quit all" })
 map("n", "<leader>Q", "<cmd>qa!<CR>", { desc = "Force quit all (discard changes)" })
 
+-- Fuzzy finding
+map("n", "<leader><leader>", "<cmd>Telescope find_files<cr>", { desc = "Find files" })
+
 -- ZK Note-taking keymaps
 map("n", "<leader>zn", function()
   vim.ui.input({ prompt = "Note title: " }, function(title)
