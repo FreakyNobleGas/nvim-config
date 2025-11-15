@@ -14,6 +14,12 @@ map("n", "<leader>Q", "<cmd>qa!<CR>", { desc = "Force quit all (discard changes)
 -- Fuzzy finding
 map("n", "<leader><leader>", "<cmd>Telescope find_files<cr>", { desc = "Find files" })
 
+-- LSP diagnostics
+map("n", "gk", vim.diagnostic.open_float, { desc = "Show diagnostic popup" })
+
+-- File explorer
+map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" })
+
 -- Window management
 map("n", "<leader>wv", "<cmd>vsplit<CR>", { desc = "Split window vertically" })
 map("n", "<leader>wh", "<cmd>split<CR>", { desc = "Split window horizontally" })
@@ -26,7 +32,7 @@ map("n", "<leader>-", "<cmd>split<CR>", { desc = "Split window horizontally" })
 map("n", "<leader>zn", function()
   vim.ui.input({ prompt = "Note title: " }, function(title)
     if title then
-      require("zk.commands").get("ZkNew")({ title = title })
+      require("zk.commands").get "ZkNew" { title = title }
     end
   end)
 end, { desc = "ZK new note" })
@@ -35,7 +41,7 @@ map("n", "<leader>zl", "<cmd>ZkNotes { sort = { 'modified' } }<cr>", { desc = "Z
 map("n", "<leader>zf", function()
   vim.ui.input({ prompt = "Search: " }, function(search)
     if search then
-      require("zk.commands").get("ZkNotes")({ match = { search } })
+      require("zk.commands").get "ZkNotes" { match = { search } }
     end
   end)
 end, { desc = "ZK find notes" })
