@@ -60,6 +60,70 @@ map("n", "<leader>cC", "<cmd>CodeCompanionChat<cr>", { desc = "CodeCompanion Cha
 map("v", "<leader>cA", "<cmd>CodeCompanionChat Add<cr>", { desc = "CodeCompanion Add to Chat" })
 map({ "n", "v" }, "<leader>ci", "<cmd>CodeCompanion<cr>", { desc = "CodeCompanion Inline" })
 
+-- CodeCompanion Context Sharing
+-- These keymaps open chat and add the current buffer/file context
+-- Note: Slash commands work best when typed manually in chat for interactive selection
+
+-- Add current buffer to new chat
+map("n", "<leader>cb", function()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local bufname = vim.api.nvim_buf_get_name(bufnr)
+  if bufname == "" then
+    vim.notify("Current buffer has no name", vim.log.levels.WARN)
+    return
+  end
+  vim.cmd("CodeCompanionChat")
+  vim.defer_fn(function()
+    local chat_bufnr = vim.api.nvim_get_current_buf()
+    -- Get the buffer content
+    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+    local content = table.concat(lines, "\n")
+    -- Insert the buffer reference into chat
+    local prompt = string.format("Here's the content from %s:\n\n```\n%s\n```\n\n", vim.fn.fnamemodify(bufname, ":~:."), content)
+    vim.api.nvim_buf_set_lines(chat_bufnr, -1, -1, false, vim.split(prompt, "\n"))
+  end, 200)
+end, { desc = "CodeCompanion: Add current buffer" })
+
+-- Add visual selection to chat
+map("v", "<leader>cb", function()
+  vim.cmd("'<,'>CodeCompanionChat Add")
+end, { desc = "CodeCompanion: Add selection to chat" })
+
+-- Quick reference keymaps that just show helpful notifications
+map("n", "<leader>cf", function()
+  vim.notify(
+    "Open chat with <leader>cc, then type:\n/file - to add files\n/buffer - to add buffers\n/symbols - for file structure",
+    vim.log.levels.INFO,
+    { title = "CodeCompanion Context" }
+  )
+end, { desc = "CodeCompanion: Context help" })
+
+-- Show all context options
+map("n", "<leader>cx", function()
+  local msg = [[
+CodeCompanion Context Options:
+
+In Chat Buffer, type:
+  /buffer   - Add open buffers
+  /file     - Add project files
+  /symbols  - Add file structure (saves tokens)
+  /terminal - Add terminal output
+  /workspace- Add workspace context
+  /memory   - Manage memory
+
+Variables (in your message):
+  #{buffer}   - Current buffer
+  #{buffer:filename} - Specific file
+  #{lsp}      - LSP diagnostics
+  #{viewport} - Current view
+
+Tools (automatically enabled):
+  @{files} - File operations
+  @read_file, @grep_search, etc.
+  ]]
+  vim.notify(msg, vim.log.levels.INFO, { title = "CodeCompanion Help" })
+end, { desc = "CodeCompanion: Show all context options" })
+
 -- Buffer management keymaps (LazyVim-style)
 map("n", "<leader>bn", "<cmd>enew<CR>", { desc = "New buffer" })
 

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:codecompanion.olimorris.dev)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

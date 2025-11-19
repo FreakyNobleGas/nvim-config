@@ -153,6 +153,7 @@ return {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
       "zbirenbaum/copilot.lua", -- For Copilot adapter
+      "nvim-telescope/telescope.nvim", -- For pickers
     },
     cmd = {
       "CodeCompanion",
@@ -164,6 +165,14 @@ return {
       strategies = {
         chat = {
           adapter = "copilot", -- Use Copilot for chat by default
+          -- Automatically include helpful tools for file operations
+          tools = {
+            opts = {
+              default_tools = {
+                "files", -- Includes read_file, file_search, grep_search
+              },
+            },
+          },
         },
         inline = {
           adapter = "copilot", -- Use Copilot for inline edits
@@ -181,6 +190,26 @@ return {
             width = 0.45,
           },
           start_in_insert_mode = true, -- Auto-enter insert mode when opening chat
+        },
+      },
+
+      -- Memory configuration for persistent context
+      memory = {
+        groups = {
+          -- Default memory group - loads automatically into chats
+          default = {
+            files = {
+              -- Project-level context (create this in your project root)
+              { path = "AI_CONTEXT.md", parser = "none" },
+              -- User-level preferences (create in ~/.config/nvim/ if desired)
+              { path = "~/.config/nvim/AI_CONTEXT.md", parser = "none" },
+            },
+          },
+        },
+        opts = {
+          chat = {
+            default_memory = "default", -- Auto-load default memory group in chats
+          },
         },
       },
 

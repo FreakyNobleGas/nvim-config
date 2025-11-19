@@ -1,148 +1,443 @@
-# README
+# Neovim Configuration
 
-This repository holds my Neovim config. I am currently using the LazyVim distribution as a starting point while I learn more about Neovim.
+Personal Neovim configuration built on [NvChad](https://nvchad.com/), optimized for full-stack development with Python, Go, TypeScript, and Svelte.
 
-## Config File Syntax
+## Table of Contents
 
-### Commands
+- [Quick Start](#quick-start)
+- [CodeCompanion AI Assistant](#codecompanion-ai-assistant)
+- [Configuration Structure](#configuration-structure)
+- [Installed Tools](#installed-tools)
+- [Key Mappings](#key-mappings)
+- [Vim Motions Cheatsheet](#vim-motions-cheatsheet)
+- [Tips & Tricks](#tips--tricks)
 
-To learn what a command does, you can search for it in the help menu. This only works for official commands such as `inccommand`.
+## Quick Start
 
-```shell
-:h inccommand
+### First Time Setup
+
+1. Clone this repo to `~/.config/nvim`
+2. Launch Neovim - plugins will auto-install via Lazy.nvim
+3. Run `:MasonInstallAll` to install LSP servers, formatters, and linters
+4. Restart Neovim
+
+### Essential Commands
+
+| Command | Description |
+|---------|-------------|
+| `:Lazy` | Open plugin manager |
+| `:Mason` | Manage LSP servers, formatters, linters |
+| `:LazyFormatInfo` | Show which formatter is active in current buffer |
+| `:LspInfo` | Show LSP server status |
+| `:help <command>` | View help for any Vim command |
+
+## CodeCompanion AI Assistant
+
+CodeCompanion provides AI-powered coding assistance using GitHub Copilot. It helps with code generation, refactoring, debugging, and answering questions about your codebase.
+
+### Core Keymaps
+
+| Keymap | Mode | Description |
+|--------|------|-------------|
+| `<leader>ca` | n, v | Open Actions menu (quick prompts) |
+| `<leader>cc` | n, v | Toggle chat buffer |
+| `<leader>cC` | n | Create new chat |
+| `<leader>cA` | v | Add selection to existing chat |
+| `<leader>ci` | n, v | Inline assistant (edit code directly) |
+
+### Context Sharing Keymaps
+
+These keymaps help you quickly share context with the AI:
+
+| Keymap | Mode | Description |
+|--------|------|-------------|
+| `<leader>cb` | n | Add current buffer content to new chat |
+| `<leader>cb` | v | Add visual selection to chat |
+| `<leader>cf` | n | Show context help (quick slash commands reference) |
+| `<leader>cx` | n | Show all context options (comprehensive help) |
+
+**Best Practice:** Open chat with `<leader>cc`, then type slash commands interactively for better control. The slash commands open pickers that let you select specific files/buffers.
+
+### Variables (Use in Chat Buffer)
+
+Variables dynamically insert context into your messages:
+
+- `#{buffer}` - Current buffer content
+- `#{buffer:filename}` - Specific file by name
+- `#{buffer:path/to/file}` - Specific file by path
+- `#{lsp}` - LSP diagnostics and errors
+- `#{viewport}` - Your current screen view
+
+**Example usage in chat:**
+```
+Can you help fix the errors in #{buffer:src/main.ts}? Here are the LSP diagnostics: #{lsp}
 ```
 
-Re-source a file after editing
-`:so`
+### Slash Commands (Use in Chat Buffer)
 
-Use LSP functions such as find references or definition:
-`g` + another character such as `r`. (e.g. `gr` will search for all references for the highlighted symbol)
+Slash commands provide additional functionality within chat:
 
-To see which formatter is being used in the current buffer
-`:LazyFormatInfo`
+| Command | Description |
+|---------|-------------|
+| `/buffer` | Add buffer(s) to chat |
+| `/file` | Add file(s) from project |
+| `/symbols` | Add file outline (saves tokens) |
+| `/workspace` | Add workspace documentation |
+| `/terminal` | Add latest terminal output |
+| `/help` | Search Vim help docs |
+| `/fetch <url>` | Fetch and add web content |
+| `/memory` | Manage memory groups |
+| `/quickfix` | Share quickfix list |
 
-### Configuration
+### Tools (Agent Capabilities)
 
-`.g` represents global config.
+Tools enable the AI to interact with your codebase autonomously:
 
-```lua
-vim.g.have_nerd_font = true
+- `@{files}` - Bundle of file operation tools
+- `@read_file` - Read file contents
+- `@file_search` - Search for files
+- `@grep_search` - Search file contents
+- `@list_code_usages` - Find symbol references (LSP)
+- `@get_changed_files` - Show git diffs
+
+**Note:** File operation tools are automatically enabled in all chats.
+
+### AI Context Files
+
+The configuration automatically loads context from these files if they exist:
+
+- `AI_CONTEXT.md` - Project-level context (in project root)
+- `~/.config/nvim/AI_CONTEXT.md` - Global preferences
+
+Edit these files to provide persistent context about your coding standards, project architecture, and preferences. The AI will reference them in all chats.
+
+## Configuration Structure
+
+```
+nvim/
+├── init.lua                      # Entry point
+├── lua/
+│   ├── autocmds.lua             # Auto commands
+│   ├── chadrc.lua               # NvChad configuration
+│   ├── mappings.lua             # All keymaps
+│   ├── options.lua              # Vim options
+│   ├── configs/                 # Plugin configurations
+│   │   ├── conform.lua          # Formatter config
+│   │   ├── lazy.lua             # Plugin manager setup
+│   │   ├── lint.lua             # Linter config
+│   │   ├── lspconfig.lua        # LSP server config
+│   │   └── nvim-tree.lua        # File explorer config
+│   └── plugins/
+│       └── init.lua             # Plugin declarations
+└── AI_CONTEXT.md                # Persistent AI context
 ```
 
-`.opt` represents options (for the most part)
+### Adding a New Plugin
 
-```lua
-vim.opt.have_nerd_font = true
+1. Add plugin spec to `nvim/lua/plugins/init.lua`:
+   ```lua
+   {
+     "author/plugin-name",
+     event = "BufReadPost",  -- Lazy load trigger
+     opts = {},              -- Plugin options
+   }
+   ```
+
+2. Add keymaps to `nvim/lua/mappings.lua` if needed
+
+3. Create config file in `nvim/lua/configs/` for complex setup
+
+## Installed Tools
+
+### LSP Servers
+- **Python**: basedpyright
+- **Go**: gopls
+- **TypeScript/JavaScript**: vtsls
+- **Svelte**: svelte-language-server
+- **Lua**: lua-language-server
+- **Bash**: bash-language-server
+- **Markdown**: marksman
+- **JSON**: json-lsp
+- **YAML**: yaml-language-server
+- **Docker**: docker-langserver, docker-compose-language-service
+
+### Formatters
+- **Python**: black, ufmt
+- **Go**: gofumpt, goimports
+- **TypeScript/JavaScript/Svelte**: prettier
+- **Lua**: stylua
+- **Bash**: shfmt
+- **Markdown**: markdown-toc
+
+### Linters
+- **Python**: ruff
+- **Bash**: shellcheck
+- **Markdown**: markdownlint-cli2
+
+### Notable Plugins
+- **Treesitter** - Syntax highlighting and code understanding
+- **Telescope** - Fuzzy finder for files, buffers, etc.
+- **nvim-tree** - File explorer
+- **which-key** - Keymap helper
+- **Flash** - Enhanced navigation
+- **Yanky** - Enhanced clipboard with history
+- **ZK** - Zettelkasten note-taking
+- **CodeCompanion** - AI assistant with Copilot
+- **Copilot** - GitHub Copilot integration
+
+## Key Mappings
+
+### General
+
+| Keymap | Mode | Description |
+|--------|------|-------------|
+| `jk` | i | Exit insert mode |
+| `;` | n | Enter command mode |
+| `<leader>q` | n | Quit all windows |
+| `<leader>Q` | n | Force quit (discard changes) |
+
+### File Navigation
+
+| Keymap | Mode | Description |
+|--------|------|-------------|
+| `<leader><leader>` | n | Find files (Telescope) |
+| `<leader>e` | n | Toggle file explorer |
+| `<C-h/j/k/l>` | n | Navigate between windows |
+
+### Buffer Management
+
+| Keymap | Mode | Description |
+|--------|------|-------------|
+| `<S-h>` | n | Previous buffer |
+| `<S-l>` | n | Next buffer |
+| `[b` | n | Previous buffer |
+| `]b` | n | Next buffer |
+| `<leader>bn` | n | New buffer |
+| `<leader>bd` | n | Delete buffer |
+| `<leader>bD` | n | Delete buffer and window |
+| `<leader>bo` | n | Delete all other buffers |
+| `<leader>bb` | n | Switch to alternate buffer |
+
+### Window Management
+
+| Keymap | Mode | Description |
+|--------|------|-------------|
+| `<leader>wv` | n | Split vertically |
+| `<leader>wh` | n | Split horizontally |
+| `<leader>\|` | n | Split vertically |
+| `<leader>-` | n | Split horizontally |
+| `<leader>wd` | n | Close window |
+| `<leader>w=` | n | Make windows equal size |
+
+### LSP
+
+| Keymap | Mode | Description |
+|--------|------|-------------|
+| `gd` | n | Go to definition |
+| `gr` | n | Find references |
+| `gk` | n | Show diagnostic popup |
+| `K` | n | Hover documentation |
+| `<leader>ca` | n, v | Code actions |
+| `<leader>rn` | n | Rename symbol |
+
+### Flash Navigation
+
+| Keymap | Mode | Description |
+|--------|------|-------------|
+| `s` | n, x, o | Flash jump |
+| `S` | n, x, o | Flash Treesitter |
+| `r` | o | Remote flash |
+| `R` | o, x | Treesitter search |
+| `<C-s>` | c | Toggle flash search |
+
+### Yanky (Clipboard)
+
+| Keymap | Mode | Description |
+|--------|------|-------------|
+| `p` | n, x | Put after (Yanky) |
+| `P` | n, x | Put before (Yanky) |
+| `<C-n>` | n | Cycle to next yank |
+| `<C-p>` | n | Cycle to previous yank |
+
+### ZK Note-Taking
+
+| Keymap | Mode | Description |
+|--------|------|-------------|
+| `<leader>zn` | n | Create new note |
+| `<leader>zl` | n | List notes by modified date |
+| `<leader>zf` | n | Find notes |
+| `<leader>zt` | n | Browse tags |
+
+**Note**: ZK requires the `zk` CLI tool to be installed. Keymaps are prefixed with `<leader>z`.
+
+## Vim Motions Cheatsheet
+
+### Text Objects
+
+| Command | Description |
+|---------|-------------|
+| `vi(` or `vi{` | Select inside parentheses/braces |
+| `va(` or `va{` | Select around parentheses/braces |
+| `yi(` or `yi{` | Yank inside parentheses/braces |
+| `ya(` or `ya{` | Yank around parentheses/braces |
+| `viW` | Select until whitespace |
+| `ciw` | Change inner word |
+| `dap` | Delete a paragraph |
+
+### Navigation
+
+| Command | Description |
+|---------|-------------|
+| `fx` | Jump to next occurrence of 'x' |
+| `Fx` | Jump to previous occurrence of 'x' |
+| `tx` | Jump to before next 'x' |
+| `Tx` | Jump to after previous 'x' |
+| `0` | Jump to start of line |
+| `^` | Jump to first non-blank character |
+| `$` | Jump to end of line |
+| `gg` | Jump to start of file |
+| `G` | Jump to end of file |
+| `%` | Jump to matching bracket |
+
+### Editing
+
+| Command | Description |
+|---------|-------------|
+| `dd` | Delete line |
+| `yy` | Yank (copy) line |
+| `cc` | Change line |
+| `u` | Undo |
+| `<C-r>` | Redo |
+| `.` | Repeat last change |
+| `:%s/old/new/g` | Replace all 'old' with 'new' in file |
+| `:%s/old/new/gc` | Replace with confirmation |
+
+## Tips & Tricks
+
+### Re-source Configuration
+
+After editing a config file:
+```vim
+:so
 ```
 
-Options for the lsp
+### Debug LSP Issues
 
-```lua
-vim.diagnostic.* 
+```vim
+:LspInfo          " Show active LSP clients
+:LspLog           " View LSP logs
+:LspRestart       " Restart LSP server
 ```
 
-### Keymaps
+### Check Formatter/Linter
 
-Parameters for the set method:
-
-1. The mode where the key is available (e.g. "n" is normal mode)
-2. The command that needs to be executed (e.g. jj in the code below)
-3. The command that's executed (e.g. the escape key in the code below)
-
-```lua
-vim.keymap.set("n", "jj", "<Esc>")
+```vim
+:LazyFormatInfo   " Show active formatter
+:ConformInfo      " Detailed formatter info
 ```
 
-Use function in keymap
+### Plugin Management
 
-```lua
-vim.keymap.set("i", "jk", function()
-  print("hello world")
-end)
+```vim
+:Lazy             " Open plugin manager
+:Lazy sync        " Install + clean + update all
+:Lazy profile     " Check startup times
 ```
 
-## Vim Motion Cheatsheet
+### Mason Tool Management
 
-### Within a () or {}
+```vim
+:Mason            " Open Mason UI
+:MasonUpdate      " Update registry
+:MasonLog         " View logs
+```
 
-NOTE: These commands will also take you to the () or {}. It does not need to be selected.
+### Find Plugin Source Code
 
-Select Text
-`vi(`
-`vi{`
+Plugins are installed in:
+```
+~/.local/share/nvim/lazy/
+```
 
-Yank Text
-`yi(`
-`yi{`
+Browse plugin code to understand commands and functions.
 
-### Around and within a () or {}
+### Disable a Plugin
 
-Select Text
-`va(`
-`va{`
-
-Yank Text
-`ya(`
-`ya{`
-
-### Select text until white space
-
-This is handy for working with lines that end in a semi-colon. You can then paste over it if needed.
-`viW`
-
-### Jump to character
-
-Jump to previous x character
-`Fx`
-
-Jump to next x character
-`fx`
-
-### Replace all strings in a file
-`:%s/old/new/g`
-
-## Plugins
-
-### Copilot
-
-Both `ai.copilot` and `ai.copilot-chat` need to be installed for both auto-completion and chat features to work.
-
-If you experience an error similar to "model is not available", you can try logging out and back into Copilot.
-`:copilot signout` -> `:copilot signin`
-
-### How to disable a plugin
-
-In the plugin directory, you can disable a plugin like so:
+In `nvim/lua/plugins/init.lua`:
 ```lua
-return {
-  { "akinsho/bufferline.nvim", enabled = false },
+{
+  "author/plugin-name",
+  enabled = false,
 }
 ```
 
-### Plugin Documentation
+### NvChad vs Lazy.nvim
 
-`:help plugin-name`
+- **NvChad**: Full Neovim distribution with pre-configured plugins
+- **Lazy.nvim**: Just a plugin manager
 
-You can find the source code for the plugins here:
-`~/.local/share/nvim/lazy/`
+This config uses NvChad as the base, which includes Lazy.nvim.
 
-Generally, you can find the commands in the plugins folder.
+### Configuration Files Syntax
 
-## General Notes
+**Global config:**
+```lua
+vim.g.variable_name = true
+```
 
-LazyVim and Lazy.nvim are not the same thing. Lazy.nvim is strictly a plugin manager where LazyVim is a collection of plugins and configurations that ship together.
+**Options:**
+```lua
+vim.opt.option_name = value
+```
 
-In the Lazy.nvim dashboard view, Sync (S) is equivalent to install, clean, and update in a single action.
+**Keymaps:**
+```lua
+vim.keymap.set("mode", "keys", "command", { desc = "Description" })
+-- mode: "n" (normal), "i" (insert), "v" (visual), "x" (visual block)
+```
 
-### ZK Note Taking Tool
+**LSP/Diagnostics:**
+```lua
+vim.diagnostic.config({ ... })
+vim.lsp.buf.function_name()
+```
 
-Keymaps start with `<leader>z`.
+## Troubleshooting
 
-Search notes:
-`zk edit --interactive`
+### Copilot Authentication Issues
 
-Search notes by tag:
-`zk list --tag "someTag"`
+If you see "model is not available" errors:
+```vim
+:Copilot signout
+:Copilot signin
+```
 
-Link a note inside a note:
-`[[header_of_note_you_want_to_link]]`
+### Plugin Not Loading
+
+1. Check if lazy-loaded: `:Lazy`
+2. Look for errors: `:messages`
+3. Check load event in plugin spec
+
+### LSP Not Working
+
+1. Verify LSP installed: `:Mason`
+2. Check LSP active: `:LspInfo`
+3. View LSP logs: `:LspLog`
+4. Restart LSP: `:LspRestart`
+
+### Formatter Not Running
+
+1. Check formatter available: `:Mason`
+2. View format settings: `:LazyFormatInfo`
+3. Check `conform.lua` configuration
+
+## Learning Resources
+
+- [NvChad Documentation](https://nvchad.com/)
+- [Neovim Documentation](https://neovim.io/doc/)
+- [Vim Cheatsheet](https://vim.rtorr.com/)
+- [CodeCompanion Docs](https://codecompanion.olimorris.dev/)
+
+## License
+
+This configuration is for personal use. Feel free to use it as inspiration for your own setup.
