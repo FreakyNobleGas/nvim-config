@@ -20,7 +20,7 @@ local servers = {
   -- Markup
   "jsonls",
   "yamlls",
-  "marksman",
+  -- "marksman", -- Disabled: using zk for markdown instead
 
   -- Lua
   "lua_ls",
@@ -33,7 +33,7 @@ local servers = {
   "docker_compose_language_service",
 }
 
--- Configure basedpyright with standard type checking
+-- Configure basedpyright with standard type checking and performance optimizations
 vim.lsp.config.basedpyright = {
   cmd = { "basedpyright-langserver", "--stdio" },
   filetypes = { "python" },
@@ -42,7 +42,37 @@ vim.lsp.config.basedpyright = {
     basedpyright = {
       analysis = {
         typeCheckingMode = "standard",
+        autoSearchPaths = true,
+        useLibraryCodeForTypes = true,
+        autoImportCompletions = true,
+        diagnosticMode = "openFilesOnly",
+        -- Exclude common directories that slow down indexing
+        exclude = {
+          "**/node_modules",
+          "**/__pycache__",
+          "**/.*",
+          "**/venv",
+          "**/.venv",
+          "**/env",
+          "**/.env",
+          "**/site-packages",
+          "**/.pytest_cache",
+          "**/.mypy_cache",
+          "**/.ruff_cache",
+          "**/dist",
+          "**/build",
+        },
+        -- Limit workspace symbol search
+        indexing = true,
+        -- Performance optimizations
+        diagnosticSeverityOverrides = {
+          reportUnusedImport = "information",
+          reportUnusedClass = "information",
+          reportUnusedFunction = "information",
+          reportUnusedVariable = "information",
+        },
       },
+      disableOrganizeImports = false,
     },
   },
 }
