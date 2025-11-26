@@ -190,6 +190,7 @@ return {
             width = 0.45,
           },
           start_in_insert_mode = true, -- Auto-enter insert mode when opening chat
+          show_reasoning = false, -- Disable rendering of thought process for better performance
         },
       },
 
