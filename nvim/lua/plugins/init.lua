@@ -161,6 +161,18 @@ return {
       "CodeCompanionActions",
     },
     opts = {
+      -- Configure adapters to use environment variable for model selection
+      adapters = {
+        copilot = function()
+          return require("codecompanion.adapters").extend("copilot", {
+            schema = {
+              model = {
+                default = os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5",
+              },
+            },
+          })
+        end,
+      },
       -- Set different default adapters per strategy
       strategies = {
         chat = {
