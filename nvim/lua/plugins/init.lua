@@ -144,24 +144,19 @@ return {
     },
     opts = {
       file_types = { "markdown", "codecompanion" },
-      code = {
-        enabled = true,
-        sign = false,
-        style = "full",
-        position = "right",
-        width = "block",
-        left_pad = 1,
-        right_pad = 1,
-        border = "thin",
-      },
       heading = {
         enabled = true,
-        sign = false,
+        sign = true,
         position = "overlay",
         icons = { "󰲡 ", "󰲣 ", "󰲥 ", "󰲧 ", "󰲩 ", "󰲫 " },
-        width = "block",
-        left_pad = 1,
+        width = "full",
+        left_pad = 0,
         right_pad = 0,
+        min_width = 0,
+        border = false,
+        border_virtual = false,
+        -- above = "▄",
+        -- below = "▀",
         backgrounds = {
           "RenderMarkdownH1Bg",
           "RenderMarkdownH2Bg",
@@ -178,6 +173,56 @@ return {
           "@markup.heading.5.markdown",
           "@markup.heading.6.markdown",
         },
+      },
+      code = {
+        enabled = true,
+        sign = true,
+        style = "full",
+        position = "left",
+        width = "full",
+        left_pad = 2,
+        right_pad = 2,
+        border = "thin",
+        above = "▄",
+        below = "▀",
+        highlight = "RenderMarkdownCode",
+      },
+      dash = {
+        enabled = true,
+        icon = "─",
+        width = "full",
+        highlight = "RenderMarkdownDash",
+      },
+      bullet = {
+        enabled = true,
+        icons = { "●", "○", "◆", "◇" },
+        left_pad = 0,
+        right_pad = 1,
+        highlight = "RenderMarkdownBullet",
+      },
+      checkbox = {
+        enabled = true,
+        unchecked = {
+          icon = "󰄱 ",
+          highlight = "RenderMarkdownUnchecked",
+        },
+        checked = {
+          icon = "󰱒 ",
+          highlight = "RenderMarkdownChecked",
+        },
+      },
+      quote = {
+        enabled = true,
+        icon = "▋",
+        repeat_linebreak = false,
+      },
+      pipe_table = {
+        enabled = true,
+        preset = "round",
+        cell = "padded",
+        padding = 0,
+        head = "RenderMarkdownTableHead",
+        row = "RenderMarkdownTableRow",
       },
     },
   },
@@ -211,10 +256,10 @@ return {
       require("codecompanion").setup(opts)
 
       -- Modify the copilot adapter's default model after setup
-      local adapters = require("codecompanion.adapters")
+      local adapters = require "codecompanion.adapters"
       if adapters.copilot and adapters.copilot.schema and adapters.copilot.schema.model then
         adapters.copilot.schema.model.default = function()
-          return os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5"
+          return os.getenv "CODECOMPANION_MODEL" or "claude-sonnet-4.5"
         end
       end
     end,
