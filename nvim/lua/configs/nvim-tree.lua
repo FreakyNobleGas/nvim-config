@@ -22,6 +22,10 @@ local options = {
   view = {
     width = 30,
   },
+  update_focused_file = {
+    enable = true,        -- Highlight current file in tree
+    update_root = false,  -- Don't change root when switching files
+  },
 }
 
 return options
