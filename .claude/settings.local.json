@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:codecompanion.olimorris.dev)"
+      "WebFetch(domain:codecompanion.olimorris.dev)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

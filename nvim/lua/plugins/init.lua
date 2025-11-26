@@ -135,6 +135,53 @@ return {
     end,
   },
 
+  -- Markdown rendering
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    ft = { "markdown", "codecompanion" },
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+    },
+    opts = {
+      file_types = { "markdown", "codecompanion" },
+      code = {
+        enabled = true,
+        sign = false,
+        style = "full",
+        position = "right",
+        width = "block",
+        left_pad = 1,
+        right_pad = 1,
+        border = "thin",
+      },
+      heading = {
+        enabled = true,
+        sign = false,
+        position = "overlay",
+        icons = { "󰲡 ", "󰲣 ", "󰲥 ", "󰲧 ", "󰲩 ", "󰲫 " },
+        width = "block",
+        left_pad = 1,
+        right_pad = 0,
+        backgrounds = {
+          "RenderMarkdownH1Bg",
+          "RenderMarkdownH2Bg",
+          "RenderMarkdownH3Bg",
+          "RenderMarkdownH4Bg",
+          "RenderMarkdownH5Bg",
+          "RenderMarkdownH6Bg",
+        },
+        foregrounds = {
+          "@markup.heading.1.markdown",
+          "@markup.heading.2.markdown",
+          "@markup.heading.3.markdown",
+          "@markup.heading.4.markdown",
+          "@markup.heading.5.markdown",
+          "@markup.heading.6.markdown",
+        },
+      },
+    },
+  },
+
   -- Copilot
   {
     "zbirenbaum/copilot.lua",
@@ -160,19 +207,18 @@ return {
       "CodeCompanionChat",
       "CodeCompanionActions",
     },
+    config = function(_, opts)
+      require("codecompanion").setup(opts)
+
+      -- Modify the copilot adapter's default model after setup
+      local adapters = require("codecompanion.adapters")
+      if adapters.copilot and adapters.copilot.schema and adapters.copilot.schema.model then
+        adapters.copilot.schema.model.default = function()
+          return os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5"
+        end
+      end
+    end,
     opts = {
-      -- Configure adapters to use environment variable for model selection
-      adapters = {
-        copilot = function()
-          return require("codecompanion.adapters").extend("copilot", {
-            schema = {
-              model = {
-                default = os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5",
-              },
-            },
-          })
-        end,
-      },
       -- Set different default adapters per strategy
       strategies = {
         chat = {

@@ -20,7 +20,7 @@ local servers = {
   -- Markup
   "jsonls",
   "yamlls",
-  -- "marksman", -- Disabled: using zk for markdown instead
+  "marksman", -- Re-enabled: provides link validation alongside zk-nvim
 
   -- Lua
   "lua_ls",
