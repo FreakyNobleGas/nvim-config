@@ -28,6 +28,12 @@ map("n", "<leader>w=", "<C-w>=", { desc = "Make windows equal size" })
 map("n", "<leader>|", "<cmd>vsplit<CR>", { desc = "Split window vertically" })
 map("n", "<leader>-", "<cmd>split<CR>", { desc = "Split window horizontally" })
 
+-- Window navigation with Option/Alt key (same as Ctrl)
+map("n", "<M-h>", "<C-w>h", { desc = "Move to left window" })
+map("n", "<M-j>", "<C-w>j", { desc = "Move to down window" })
+map("n", "<M-k>", "<C-w>k", { desc = "Move to up window" })
+map("n", "<M-l>", "<C-w>l", { desc = "Move to right window" })
+
 -- ZK Note-taking keymaps
 map("n", "<leader>zn", function()
   vim.ui.input({ prompt = "Note title: " }, function(title)
