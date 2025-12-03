@@ -252,22 +252,14 @@ return {
       "CodeCompanionChat",
       "CodeCompanionActions",
     },
-    config = function(_, opts)
-      require("codecompanion").setup(opts)
-
-      -- Modify the copilot adapter's default model after setup
-      local adapters = require "codecompanion.adapters"
-      if adapters.copilot and adapters.copilot.schema and adapters.copilot.schema.model then
-        adapters.copilot.schema.model.default = function()
-          return os.getenv "CODECOMPANION_MODEL" or "claude-sonnet-4.5"
-        end
-      end
-    end,
     opts = {
       -- Set different default adapters per strategy
       strategies = {
         chat = {
-          adapter = "copilot", -- Use Copilot for chat by default
+          adapter = {
+            name = "copilot",
+            model = os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5",
+          },
           -- Automatically include helpful tools for file operations
           tools = {
             opts = {
@@ -278,10 +270,16 @@ return {
           },
         },
         inline = {
-          adapter = "copilot", -- Use Copilot for inline edits
+          adapter = {
+            name = "copilot",
+            model = os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5",
+          },
         },
         cmd = {
-          adapter = "copilot", -- Use Copilot for quick commands
+          adapter = {
+            name = "copilot",
+            model = os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5",
+          },
         },
       },
 
