@@ -2,8 +2,25 @@ local options = {
   formatters_by_ft = {
     lua = { "stylua" },
 
-    -- Python
-    python = { "ufmt", "black" },
+    -- Python - auto-detect formatter based on project config
+    python = function(bufnr)
+      -- Check if project has ufmt config in pyproject.toml
+      local cwd = vim.fn.getcwd()
+      local pyproject_path = cwd .. "/pyproject.toml"
+      local handle = io.open(pyproject_path, "r")
+
+      if handle then
+        local content = handle:read("*all")
+        handle:close()
+        -- Check for ufmt configuration section
+        if content:match("%[tool%.ufmt%]") or content:match("ufmt") then
+          return { "ufmt" }
+        end
+      end
+
+      -- Default to black if no ufmt config found
+      return { "black" }
+    end,
 
     -- Web
     typescript = { "prettier" },
