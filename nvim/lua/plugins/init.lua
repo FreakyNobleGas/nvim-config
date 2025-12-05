@@ -37,11 +37,11 @@ return {
         find_files = {
           hidden = true,
           -- Search hidden files including .projen/tasks.json
-          find_command = { "rg", "--files", "--hidden", "--glob", "!.git/*" },
+          find_command = { "rg", "--files", "--hidden", "--glob", "!.git/*", "--glob", "!.github/*" },
         },
         live_grep = {
           additional_args = function()
-            return { "--hidden", "--glob", "!.git/*" }
+            return { "--hidden", "--glob", "!.git/*", "--glob", "!.github/*" }
           end,
         },
       },
