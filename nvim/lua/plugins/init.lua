@@ -29,6 +29,20 @@ return {
     end,
   },
 
+  -- Telescope fuzzy finder
+  {
+    "nvim-telescope/telescope.nvim",
+    opts = {
+      pickers = {
+        find_files = {
+          hidden = true,
+          -- Respect .gitignore but specifically include .projen
+          find_command = { "rg", "--files", "--hidden", "--glob", "!.git/*", "--glob", "!.projen/*", "--glob", ".projen/tasks.json" },
+        },
+      },
+    },
+  },
+
   -- Mason auto-installer
   {
     "williamboman/mason.nvim",
