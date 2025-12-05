@@ -46,11 +46,12 @@ vim.lsp.config.basedpyright = {
         useLibraryCodeForTypes = true,
         autoImportCompletions = true,
         diagnosticMode = "openFilesOnly",
-        -- Add extra paths for pytest and common project structures
+        -- Add extra paths to match pytest.ini configuration
         extraPaths = {
           ".",
-          "src",
-          "tests",
+          "src/runtime",
+          "tests/unit",
+          "tests/infrastructure",
         },
         -- Exclude common directories that slow down indexing
         exclude = {
