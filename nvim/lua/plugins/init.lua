@@ -36,8 +36,13 @@ return {
       pickers = {
         find_files = {
           hidden = true,
-          -- Respect .gitignore but specifically include .projen
-          find_command = { "rg", "--files", "--hidden", "--glob", "!.git/*", "--glob", "!.projen/*", "--glob", ".projen/tasks.json" },
+          -- Search hidden files including .projen/tasks.json
+          find_command = { "rg", "--files", "--hidden", "--glob", "!.git/*" },
+        },
+        live_grep = {
+          additional_args = function()
+            return { "--hidden", "--glob", "!.git/*" }
+          end,
         },
       },
     },
