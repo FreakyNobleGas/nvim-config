@@ -46,6 +46,12 @@ vim.lsp.config.basedpyright = {
         useLibraryCodeForTypes = true,
         autoImportCompletions = true,
         diagnosticMode = "openFilesOnly",
+        -- Add extra paths for pytest and common project structures
+        extraPaths = {
+          ".",
+          "src",
+          "tests",
+        },
         -- Exclude common directories that slow down indexing
         exclude = {
           "**/node_modules",
@@ -70,6 +76,9 @@ vim.lsp.config.basedpyright = {
           reportUnusedClass = "information",
           reportUnusedFunction = "information",
           reportUnusedVariable = "information",
+          -- Reduce noise in test files
+          reportMissingImports = "warning",
+          reportPrivateUsage = "none",
         },
       },
       disableOrganizeImports = false,
