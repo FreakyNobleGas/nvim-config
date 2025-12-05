@@ -17,6 +17,19 @@ map("n", "<leader><leader>", "<cmd>Telescope find_files<cr>", { desc = "Find fil
 -- LSP diagnostics
 map("n", "gk", vim.diagnostic.open_float, { desc = "Show diagnostic popup" })
 
+-- Global search and replace in current buffer
+map("n", "gR", function()
+  vim.ui.input({ prompt = "Search: " }, function(search)
+    if search and search ~= "" then
+      vim.ui.input({ prompt = "Replace with: " }, function(replace)
+        if replace then
+          vim.cmd(string.format("%%s/%s/%s/g", vim.fn.escape(search, "/\\"), vim.fn.escape(replace, "/\\")))
+        end
+      end)
+    end
+  end)
+end, { desc = "Global replace in buffer" })
+
 -- File explorer
 map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" })
 
