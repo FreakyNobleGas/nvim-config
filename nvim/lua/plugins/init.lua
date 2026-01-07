@@ -283,7 +283,9 @@ return {
           tools = {
             opts = {
               default_tools = {
-                "files", -- Includes read_file, file_search, grep_search
+                "read_file",
+                "file_search",
+                "grep_search",
               },
             },
           },
