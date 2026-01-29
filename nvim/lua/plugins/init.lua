@@ -24,8 +24,8 @@ return {
   -- nvim-tree file explorer
   {
     "nvim-tree/nvim-tree.lua",
-    opts = function()
-      return require "configs.nvim-tree"
+    config = function()
+      require("nvim-tree").setup(require "configs.nvim-tree")
     end,
   },
 
