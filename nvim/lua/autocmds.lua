@@ -29,3 +29,19 @@ vim.api.nvim_create_autocmd("ColorScheme", {
 vim.schedule(function()
   vim.cmd "doautocmd ColorScheme"
 end)
+
+-- Update the `updated` frontmatter field in zk notes on save
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = vim.fn.expand "~" .. "/Documents/zk-notes/*.md",
+  callback = function()
+    local timestamp = os.date "%Y-%m-%d %H:%M"
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    for i, line in ipairs(lines) do
+      if line:match "^updated:" then
+        lines[i] = "updated: " .. timestamp
+        vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+        break
+      end
+    end
+  end,
+})

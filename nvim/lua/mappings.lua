@@ -48,23 +48,113 @@ map("n", "<M-k>", "<C-w>k", { desc = "Move to up window" })
 map("n", "<M-l>", "<C-w>l", { desc = "Move to right window" })
 
 -- ZK Note-taking keymaps
+local function zk_new(opts)
+  local notebook = vim.env.ZK_NOTEBOOK_DIR
+  local cmd = { "zk", "new", "--print-path", "--title", opts.title }
+  vim.list_extend(cmd, opts.args or {})
+  vim.system(cmd, { text = true, cwd = notebook }, function(obj)
+    if obj.code == 0 then
+      local path = vim.trim(obj.stdout)
+      vim.schedule(function()
+        if path ~= "" then
+          vim.cmd("e " .. vim.fn.fnameescape(path))
+        end
+      end)
+    else
+      vim.schedule(function()
+        vim.notify("zk: " .. vim.trim(obj.stderr or ""), vim.log.levels.ERROR)
+      end)
+    end
+  end)
+end
+
 map("n", "<leader>zn", function()
   vim.ui.input({ prompt = "Note title: " }, function(title)
     if title then
-      require("zk.commands").get "ZkNew" { title = title }
+      zk_new { title = title }
     end
   end)
 end, { desc = "ZK new note" })
 
-map("n", "<leader>zl", "<cmd>ZkNotes { sort = { 'modified' } }<cr>", { desc = "ZK list notes" })
-map("n", "<leader>zf", function()
-  vim.ui.input({ prompt = "Search: " }, function(search)
-    if search then
-      require("zk.commands").get "ZkNotes" { match = { search } }
+map("n", "<leader>zm", function()
+  local date = os.date "%Y-%m-%d"
+  vim.ui.input({ prompt = "Meeting subject: " }, function(subject)
+    if subject then
+      zk_new { title = date .. " " .. subject, args = { "meetings" } }
     end
   end)
+end, { desc = "ZK new meeting note" })
+
+map("n", "<leader>zf", function()
+  local notebook = vim.env.ZK_NOTEBOOK_DIR
+  vim.system(
+    { "zk", "list", "--quiet", "--format", "{{title}}\t{{path}}", "--sort", "modified" },
+    { text = true, cwd = notebook },
+    function(obj)
+      if obj.code ~= 0 then return end
+      local entries = {}
+      for line in obj.stdout:gmatch "[^\n]+" do
+        local title, path = line:match "^(.-)\t(.+)$"
+        if title and path then
+          table.insert(entries, { title = title, path = notebook .. "/" .. path })
+        end
+      end
+      vim.schedule(function()
+        local pickers = require "telescope.pickers"
+        local finders = require "telescope.finders"
+        local conf = require("telescope.config").values
+        local actions = require "telescope.actions"
+        local action_state = require "telescope.actions.state"
+        pickers
+          .new({}, {
+            prompt_title = "ZK Notes",
+            finder = finders.new_table {
+              results = entries,
+              entry_maker = function(entry)
+                return {
+                  value = entry.path,
+                  display = entry.title,
+                  ordinal = entry.title,
+                  path = entry.path,
+                }
+              end,
+            },
+            sorter = conf.generic_sorter {},
+            previewer = conf.file_previewer {},
+            attach_mappings = function(prompt_bufnr)
+              actions.select_default:replace(function()
+                actions.close(prompt_bufnr)
+                local sel = action_state.get_selected_entry()
+                vim.cmd("e " .. vim.fn.fnameescape(sel.path))
+              end)
+              return true
+            end,
+          })
+          :find()
+      end)
+    end
+  )
 end, { desc = "ZK find notes" })
-map("n", "<leader>zt", "<cmd>ZkTags<cr>", { desc = "ZK tags" })
+
+map("n", "<leader>zt", function()
+  local notebook = vim.env.ZK_NOTEBOOK_DIR
+  vim.system({ "zk", "tag", "list", "--quiet", "--format", "{{name}}" }, { text = true, cwd = notebook }, function(obj)
+    if obj.code == 0 then
+      local tags = vim.split(vim.trim(obj.stdout), "\n")
+      vim.schedule(function()
+        vim.ui.select(tags, { prompt = "Select tag:" }, function(tag)
+          if tag then
+            require("telescope.builtin").find_files {
+              prompt_title = "ZK Notes: " .. tag,
+              cwd = notebook,
+              find_command = { "zk", "list", "--quiet", "--format", "{{path}}", "--tag", tag },
+            }
+          end
+        end)
+      end)
+    end
+  end)
+end, { desc = "ZK tags" })
 
 -- Yanky keymaps
 map({ "n", "x" }, "p", "<Plug>(YankyPutAfter)")
