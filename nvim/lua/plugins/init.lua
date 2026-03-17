@@ -272,13 +272,23 @@ return {
       "CodeCompanionActions",
     },
     opts = {
-      -- Set different default adapters per strategy
-      strategies = {
+      -- Configure copilot adapter with custom model
+      adapters = {
+        copilot = function()
+          return require("codecompanion.adapters").extend("copilot", {
+            schema = {
+              model = {
+                default = os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5",
+              },
+            },
+          })
+        end,
+      },
+
+      -- Set different default adapters per interaction (v18+ API)
+      interactions = {
         chat = {
-          adapter = {
-            name = "copilot",
-            model = os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5",
-          },
+          adapter = "copilot",
           -- Automatically include helpful tools for file operations
           tools = {
             opts = {
@@ -291,16 +301,10 @@ return {
           },
         },
         inline = {
-          adapter = {
-            name = "copilot",
-            model = os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5",
-          },
+          adapter = "copilot",
         },
         cmd = {
-          adapter = {
-            name = "copilot",
-            model = os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5",
-          },
+          adapter = "copilot",
         },
       },
 
@@ -316,22 +320,20 @@ return {
         },
       },
 
-      -- Memory configuration for persistent context
-      memory = {
-        groups = {
-          -- Default memory group - loads automatically into chats
-          default = {
-            files = {
-              -- Project-level context (create this in your project root)
-              { path = "AI_CONTEXT.md", parser = "none" },
-              -- User-level preferences (create in ~/.config/nvim/ if desired)
-              { path = "~/.config/nvim/AI_CONTEXT.md", parser = "none" },
-            },
+      -- Rules configuration for persistent context (v18+ API, replaces memory)
+      rules = {
+        ai_context = {
+          description = "Project and user AI context files",
+          files = {
+            -- Project-level context (create this in your project root)
+            { path = "AI_CONTEXT.md", parser = "none" },
+            -- User-level preferences (create in ~/.config/nvim/ if desired)
+            { path = "~/.config/nvim/AI_CONTEXT.md", parser = "none" },
           },
         },
         opts = {
           chat = {
-            default_memory = "default", -- Auto-load default memory group in chats
+            autoload = "ai_context", -- Auto-load this rules group in chats
           },
         },
       },
