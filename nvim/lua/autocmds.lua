@@ -4,24 +4,31 @@ require "nvchad.autocmds"
 vim.api.nvim_create_autocmd("ColorScheme", {
   pattern = "*",
   callback = function()
-    -- Soft pastel color palette for markdown headings
-    local colors = {
-      red = "#ffc9d9",
-      orange = "#ffe4c4",
-      yellow = "#fff4c4",
-      green = "#d4f5d4",
-      blue = "#c4e4f5",
-      purple = "#e5d4f5",
-      base = "#2a273f",
+    -- Muted dark color palette for markdown headings (Rosé Pine-inspired)
+    local bg = {
+      purple = "#2d1f4a",
+      orange = "#3a2510",
+      yellow = "#2f2b10",
+      green  = "#1a2f1a",
+      blue   = "#1a2a3a",
+      red    = "#3a1525",
+    }
+    local fg = {
+      purple = "#c4a7e7",
+      orange = "#f6c177",
+      yellow = "#e8d48b",
+      green  = "#9ccfd8",
+      blue   = "#7ec8e3",
+      red    = "#eb6f92",
     }
 
-    -- Define heading background highlights with soft pastel colors
-    vim.api.nvim_set_hl(0, "RenderMarkdownH1Bg", { bg = colors.purple, fg = colors.base, bold = true })
-    vim.api.nvim_set_hl(0, "RenderMarkdownH2Bg", { bg = colors.orange, fg = colors.base, bold = true })
-    vim.api.nvim_set_hl(0, "RenderMarkdownH3Bg", { bg = colors.yellow, fg = colors.base, bold = true })
-    vim.api.nvim_set_hl(0, "RenderMarkdownH4Bg", { bg = colors.green, fg = colors.base, bold = true })
-    vim.api.nvim_set_hl(0, "RenderMarkdownH5Bg", { bg = colors.blue, fg = colors.base, bold = true })
-    vim.api.nvim_set_hl(0, "RenderMarkdownH6Bg", { bg = colors.red, fg = colors.base, bold = true })
+    -- Define heading background highlights with muted dark colors
+    vim.api.nvim_set_hl(0, "RenderMarkdownH1Bg", { bg = bg.purple, fg = fg.purple, bold = true })
+    vim.api.nvim_set_hl(0, "RenderMarkdownH2Bg", { bg = bg.orange, fg = fg.orange, bold = true })
+    vim.api.nvim_set_hl(0, "RenderMarkdownH3Bg", { bg = bg.yellow, fg = fg.yellow, bold = true })
+    vim.api.nvim_set_hl(0, "RenderMarkdownH4Bg", { bg = bg.green,  fg = fg.green,  bold = true })
+    vim.api.nvim_set_hl(0, "RenderMarkdownH5Bg", { bg = bg.blue,   fg = fg.blue,   bold = true })
+    vim.api.nvim_set_hl(0, "RenderMarkdownH6Bg", { bg = bg.red,    fg = fg.red,    bold = true })
   end,
 })
 
