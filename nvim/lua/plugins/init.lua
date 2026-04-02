@@ -263,7 +263,6 @@ return {
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
-      "zbirenbaum/copilot.lua", -- For Copilot adapter
       "nvim-telescope/telescope.nvim", -- For pickers
     },
     cmd = {
@@ -272,29 +271,46 @@ return {
       "CodeCompanionActions",
     },
     opts = {
-      -- Configure copilot adapter with custom model
+      -- LiteLLM proxy adapters (OpenAI-compatible local endpoint)
       adapters = {
-        copilot = function()
-          return require("codecompanion.adapters").extend("copilot", {
+        litellm = function()
+          return require("codecompanion.adapters").extend("openai_compatible", {
+            env = {
+              url = "http://localhost:4000",
+              api_key = "sk-local-test",
+            },
             schema = {
               model = {
-                default = os.getenv("CODECOMPANION_MODEL") or "claude-sonnet-4.5",
+                default = "claude-sonnet",
+              },
+            },
+          })
+        end,
+        litellm_haiku = function()
+          return require("codecompanion.adapters").extend("openai_compatible", {
+            env = {
+              url = "http://localhost:4000",
+              api_key = "sk-local-test",
+            },
+            schema = {
+              model = {
+                default = "claude-haiku",
               },
             },
           })
         end,
       },
 
-      -- Set different default adapters per strategy
+      -- claude-sonnet for chat/tasks, claude-haiku for inline (faster)
       strategies = {
         chat = {
-          adapter = "copilot",
+          adapter = "litellm",
         },
         inline = {
-          adapter = "copilot",
+          adapter = "litellm_haiku",
         },
         cmd = {
-          adapter = "copilot",
+          adapter = "litellm",
         },
       },
 
