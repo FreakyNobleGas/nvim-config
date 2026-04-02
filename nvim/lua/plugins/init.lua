@@ -275,7 +275,7 @@ return {
       adapters = {
         http = {
           litellm = function()
-            return require("codecompanion.adapters").extend("anthropic", {
+            local adapter = require("codecompanion.adapters").extend("anthropic", {
               url = "http://localhost:4000/v1/messages",
               env = {
                 api_key = "sk-local-test",
@@ -286,9 +286,17 @@ return {
                 },
               },
             })
+            -- LiteLLM rejects top-level cache_control; wrap form_messages to strip it
+            local orig = adapter.handlers.form_messages
+            adapter.handlers.form_messages = function(self, messages)
+              local result = orig(self, messages)
+              if result then result.cache_control = nil end
+              return result
+            end
+            return adapter
           end,
           litellm_haiku = function()
-            return require("codecompanion.adapters").extend("anthropic", {
+            local adapter = require("codecompanion.adapters").extend("anthropic", {
               url = "http://localhost:4000/v1/messages",
               env = {
                 api_key = "sk-local-test",
@@ -299,6 +307,13 @@ return {
                 },
               },
             })
+            local orig = adapter.handlers.form_messages
+            adapter.handlers.form_messages = function(self, messages)
+              local result = orig(self, messages)
+              if result then result.cache_control = nil end
+              return result
+            end
+            return adapter
           end,
         },
       },
