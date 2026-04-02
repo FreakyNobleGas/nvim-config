@@ -115,3 +115,21 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     end
   end,
 })
+
+-- CodeCompanion thinking indicator via fidget.nvim
+vim.api.nvim_create_autocmd("User", {
+  pattern = "CodeCompanionRequestStarted",
+  callback = function()
+    require("fidget").notify("thinking…", vim.log.levels.INFO, {
+      key = "codecompanion",
+      annote = "CodeCompanion",
+    })
+  end,
+})
+
+vim.api.nvim_create_autocmd("User", {
+  pattern = { "CodeCompanionRequestFinished", "CodeCompanionChatStopped" },
+  callback = function()
+    require("fidget").notify(nil, nil, { key = "codecompanion" })
+  end,
+})

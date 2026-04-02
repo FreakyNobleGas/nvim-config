@@ -13,6 +13,7 @@ M.ui = {
   tabufline = {
     lazyload = false,
   },
+
 }
 
 M.nvdash = {

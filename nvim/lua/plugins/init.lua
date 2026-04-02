@@ -1,4 +1,11 @@
 return {
+  -- Progress/notification UI (LSP + CodeCompanion thinking indicator)
+  {
+    "j-hui/fidget.nvim",
+    event = "VeryLazy",
+    opts = {},
+  },
+
   -- Ensure which-key is ready when Neovim starts up
   {
     "folke/which-key.nvim",
