@@ -273,32 +273,34 @@ return {
     opts = {
       -- LiteLLM proxy adapters (OpenAI-compatible local endpoint)
       adapters = {
-        litellm = function()
-          return require("codecompanion.adapters").extend("openai_compatible", {
-            env = {
-              url = "http://localhost:4000",
-              api_key = "sk-local-test",
-            },
-            schema = {
-              model = {
-                default = "claude-sonnet",
+        http = {
+          litellm = function()
+            return require("codecompanion.adapters").extend("openai_compatible", {
+              env = {
+                url = "http://localhost:4000",
+                api_key = "sk-local-test",
               },
-            },
-          })
-        end,
-        litellm_haiku = function()
-          return require("codecompanion.adapters").extend("openai_compatible", {
-            env = {
-              url = "http://localhost:4000",
-              api_key = "sk-local-test",
-            },
-            schema = {
-              model = {
-                default = "claude-haiku",
+              schema = {
+                model = {
+                  default = "claude-sonnet",
+                },
               },
-            },
-          })
-        end,
+            })
+          end,
+          litellm_haiku = function()
+            return require("codecompanion.adapters").extend("openai_compatible", {
+              env = {
+                url = "http://localhost:4000",
+                api_key = "sk-local-test",
+              },
+              schema = {
+                model = {
+                  default = "claude-haiku",
+                },
+              },
+            })
+          end,
+        },
       },
 
       -- claude-sonnet for chat/tasks, claude-haiku for inline (faster)
