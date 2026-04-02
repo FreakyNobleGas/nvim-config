@@ -96,11 +96,8 @@ return {
   },
 
   -- Treesitter with all parsers
-  -- NOTE: switch to "main" branch for Neovim 0.12.0 compatibility (master is frozen)
   {
     "nvim-treesitter/nvim-treesitter",
-    branch = "main",
-    cmd = { "TSUpdate", "TSInstall", "TSUninstall", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
     opts = {
       ensure_installed = {
         -- Defaults

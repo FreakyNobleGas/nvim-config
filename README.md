@@ -47,7 +47,7 @@ After pulling this config on a machine running Neovim 0.12.0, run the following 
 - `nvim_buf_get_option()` / `nvim_buf_set_option()` / `nvim_win_get_option()` / `nvim_win_set_option()` — removed. Replaced with `vim.bo[buf].option`, `vim.wo[win].option`, or `vim.api.nvim_get_option_value()`.
 - `vim.diagnostic.disable()` and `vim.diagnostic.is_disabled()` — removed. Use `vim.diagnostic.enable(buf, { enabled = false })` instead.
 - CodeCompanion config key `interactions` renamed to `strategies`; `rules` renamed to `memory`.
-- `nvim-treesitter` — the `master` branch is frozen and incompatible with 0.12.0 (the new directive/predicate API changed `match` captures from `TSNode` to `TSNode[]`). This config now tracks the `main` branch, which is built for 0.12.0+. After pulling, run `:TSUpdate` inside Neovim to rebuild all parsers.
+- `nvim-treesitter` — the `master` branch is frozen but still correct for NvChad (the `main` branch requires the `tree-sitter` CLI and a full config rewrite — NvChad itself reverted from it). However, `master` has a 0.12.0 incompatibility: directive/predicate callbacks now receive `TSNode[]` arrays instead of a single `TSNode`. This is fixed in `autocmds.lua` with runtime overrides of the three broken directives (`set-lang-from-info-string!`, `set-lang-from-mimetype!`, `downcase!`) — no manual steps needed on any machine.
 
 **Behavioral change to be aware of (not configurable):**
 
