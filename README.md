@@ -5,6 +5,7 @@ Personal Neovim configuration built on [NvChad](https://nvchad.com/), optimized 
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [Neovim Version Migration](#neovim-version-migration)
 - [CodeCompanion AI Assistant](#codecompanion-ai-assistant)
 - [Configuration Structure](#configuration-structure)
 - [Installed Tools](#installed-tools)
@@ -30,6 +31,39 @@ Personal Neovim configuration built on [NvChad](https://nvchad.com/), optimized 
 | `:LazyFormatInfo` | Show which formatter is active in current buffer |
 | `:LspInfo` | Show LSP server status |
 | `:help <command>` | View help for any Vim command |
+
+## Neovim Version Migration
+
+### Upgrading to Neovim 0.12.0
+
+After pulling this config on a machine running Neovim 0.12.0, run the following to update plugins and pick up compatibility fixes:
+
+```vim
+:Lazy update
+```
+
+**What changed in this config for 0.12.0:**
+
+- `nvim_buf_get_option()` / `nvim_buf_set_option()` / `nvim_win_get_option()` / `nvim_win_set_option()` — removed. Replaced with `vim.bo[buf].option`, `vim.wo[win].option`, or `vim.api.nvim_get_option_value()`.
+- `vim.diagnostic.disable()` and `vim.diagnostic.is_disabled()` — removed. Use `vim.diagnostic.enable(buf, { enabled = false })` instead.
+- CodeCompanion config key `interactions` renamed to `strategies`; `rules` renamed to `memory`.
+- `nvim-treesitter` — the `master` branch is frozen and incompatible with 0.12.0 (the new directive/predicate API changed `match` captures from `TSNode` to `TSNode[]`). This config now tracks the `main` branch, which is built for 0.12.0+. After pulling, run `:TSUpdate` inside Neovim to rebuild all parsers.
+
+**Behavioral change to be aware of (not configurable):**
+
+- `<C-r>` in insert mode now inserts registers literally (like paste) rather than as typed input. Use `<C-r><C-o>` if you need the old character-by-character behavior.
+
+**Known plugin warnings (upstream, not blocking):**
+
+- `zk-nvim` uses the deprecated `vim.validate{table}` form — will be removed in Neovim 1.0. Track [zk-org/zk-nvim](https://github.com/zk-org/zk-nvim) for an upstream fix.
+
+**Verify everything is clean after updating:**
+
+```vim
+:checkhealth vim.deprecated
+```
+
+Should report "No deprecated functions detected".
 
 ## CodeCompanion AI Assistant
 

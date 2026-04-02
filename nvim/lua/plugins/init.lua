@@ -96,8 +96,11 @@ return {
   },
 
   -- Treesitter with all parsers
+  -- NOTE: switch to "main" branch for Neovim 0.12.0 compatibility (master is frozen)
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
+    cmd = { "TSUpdate", "TSInstall", "TSUninstall", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
     opts = {
       ensure_installed = {
         -- Defaults
@@ -285,20 +288,10 @@ return {
         end,
       },
 
-      -- Set different default adapters per interaction (v18+ API)
-      interactions = {
+      -- Set different default adapters per strategy
+      strategies = {
         chat = {
           adapter = "copilot",
-          -- Automatically include helpful tools for file operations
-          tools = {
-            opts = {
-              default_tools = {
-                "read_file",
-                "file_search",
-                "grep_search",
-              },
-            },
-          },
         },
         inline = {
           adapter = "copilot",
@@ -320,8 +313,8 @@ return {
         },
       },
 
-      -- Rules configuration for persistent context (v18+ API, replaces memory)
-      rules = {
+      -- Memory configuration for persistent context
+      memory = {
         ai_context = {
           description = "Project and user AI context files",
           files = {
@@ -330,11 +323,7 @@ return {
             -- User-level preferences (create in ~/.config/nvim/ if desired)
             { path = "~/.config/nvim/AI_CONTEXT.md", parser = "none" },
           },
-        },
-        opts = {
-          chat = {
-            autoload = "ai_context", -- Auto-load this rules group in chats
-          },
+          is_default = true,
         },
       },
 

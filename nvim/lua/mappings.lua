@@ -246,7 +246,7 @@ map("n", "<leader>bo", function()
   local current = vim.api.nvim_get_current_buf()
   local buffers = vim.api.nvim_list_bufs()
   for _, buf in ipairs(buffers) do
-    if buf ~= current and vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, "buflisted") then
+    if buf ~= current and vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted then
       vim.api.nvim_buf_delete(buf, { force = false })
     end
   end
