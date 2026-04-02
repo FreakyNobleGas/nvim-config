@@ -271,13 +271,13 @@ return {
       "CodeCompanionActions",
     },
     opts = {
-      -- LiteLLM proxy adapters (OpenAI-compatible local endpoint)
+      -- LiteLLM proxy adapters using Anthropic format (avoids OpenAI tool_use translation issues)
       adapters = {
         http = {
           litellm = function()
-            return require("codecompanion.adapters").extend("openai_compatible", {
+            return require("codecompanion.adapters").extend("anthropic", {
+              url = "http://localhost:4000/v1/messages",
               env = {
-                url = "http://localhost:4000",
                 api_key = "sk-local-test",
               },
               schema = {
@@ -288,9 +288,9 @@ return {
             })
           end,
           litellm_haiku = function()
-            return require("codecompanion.adapters").extend("openai_compatible", {
+            return require("codecompanion.adapters").extend("anthropic", {
+              url = "http://localhost:4000/v1/messages",
               env = {
-                url = "http://localhost:4000",
                 api_key = "sk-local-test",
               },
               schema = {
