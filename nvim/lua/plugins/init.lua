@@ -161,12 +161,35 @@ return {
     end,
   },
 
+  -- Image rendering (kitty graphics protocol, used by render-markdown)
+  {
+    "3rd/image.nvim",
+    build = false,
+    ft = { "markdown" },
+    opts = {
+      backend = "kitty",
+      processor = "magick_cli",
+      integrations = {
+        markdown = {
+          enabled = true,
+          clear_in_insert_mode = false,
+          download_remote_images = true,
+          only_render_image_at_cursor = false,
+          filetypes = { "markdown" },
+        },
+      },
+      max_height_window_percentage = 50,
+      hijack_file_patterns = { "*.png", "*.jpg", "*.gif", "*.webp", "*.avif" },
+    },
+  },
+
   -- Markdown rendering
   {
     "MeanderingProgrammer/render-markdown.nvim",
     ft = { "markdown", "codecompanion" },
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
+      "3rd/image.nvim",
     },
     opts = {
       file_types = { "markdown", "codecompanion" },
@@ -249,6 +272,9 @@ return {
         padding = 0,
         head = "RenderMarkdownTableHead",
         row = "RenderMarkdownTableRow",
+      },
+      image = {
+        enabled = true,
       },
     },
   },
