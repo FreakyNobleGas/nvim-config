@@ -24,71 +24,40 @@ Personal Neovim configuration built on [NvChad](https://nvchad.com/), optimized 
 
 ### Essential Commands
 
-| Command | Description |
-|---------|-------------|
-| `:Lazy` | Open plugin manager |
-| `:Mason` | Manage LSP servers, formatters, linters |
+| Command           | Description                                      |
+| ----------------- | ------------------------------------------------ |
+| `:Lazy`           | Open plugin manager                              |
+| `:Mason`          | Manage LSP servers, formatters, linters          |
 | `:LazyFormatInfo` | Show which formatter is active in current buffer |
-| `:LspInfo` | Show LSP server status |
-| `:help <command>` | View help for any Vim command |
-
-## Neovim Version Migration
-
-### Upgrading to Neovim 0.12.0
-
-After pulling this config on a machine running Neovim 0.12.0, run the following to update plugins and pick up compatibility fixes:
-
-```vim
-:Lazy update
-```
-
-**What changed in this config for 0.12.0:**
-
-- `nvim_buf_get_option()` / `nvim_buf_set_option()` / `nvim_win_get_option()` / `nvim_win_set_option()` — removed. Replaced with `vim.bo[buf].option`, `vim.wo[win].option`, or `vim.api.nvim_get_option_value()`.
-- `vim.diagnostic.disable()` and `vim.diagnostic.is_disabled()` — removed. Use `vim.diagnostic.enable(buf, { enabled = false })` instead.
-- CodeCompanion config key `interactions` renamed to `strategies`; `rules` renamed to `memory`.
-- `nvim-treesitter` — the `master` branch is frozen but still correct for NvChad (the `main` branch requires the `tree-sitter` CLI and a full config rewrite — NvChad itself reverted from it). However, `master` has a 0.12.0 incompatibility: directive/predicate callbacks now receive `TSNode[]` arrays instead of a single `TSNode`. This is fixed in `autocmds.lua` with runtime overrides of the three broken directives (`set-lang-from-info-string!`, `set-lang-from-mimetype!`, `downcase!`) — no manual steps needed on any machine.
-
-**Behavioral change to be aware of (not configurable):**
-
-- `<C-r>` in insert mode now inserts registers literally (like paste) rather than as typed input. Use `<C-r><C-o>` if you need the old character-by-character behavior.
-
-**Known plugin warnings (upstream, not blocking):**
-
-- `zk-nvim` uses the deprecated `vim.validate{table}` form — will be removed in Neovim 1.0. Track [zk-org/zk-nvim](https://github.com/zk-org/zk-nvim) for an upstream fix.
-
-**Verify everything is clean after updating:**
-
-```vim
-:checkhealth vim.deprecated
-```
+| `:LspInfo`        | Show LSP server status                           |
+| `:help <command>` | View help for any Vim command                    |
 
 Should report "No deprecated functions detected".
 
 ## CodeCompanion AI Assistant
 
-CodeCompanion provides AI-powered coding assistance using GitHub Copilot. It helps with code generation, refactoring, debugging, and answering questions about your codebase.
+CodeCompanion provides AI-powered coding assistance via a local [LiteLLM](https://github.com/BerriAI/litellm) proxy using Claude (Anthropic) models. Chat and agent tasks use `claude-sonnet`; inline edits use `claude-haiku` for faster responses.
 
 ### Core Keymaps
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `<leader>ca` | n, v | Open Actions menu (quick prompts) |
-| `<leader>cc` | n, v | Toggle chat buffer |
-| `<leader>cC` | n | Create new chat |
-| `<leader>cA` | v | Add selection to existing chat |
+| Keymap       | Mode | Description                           |
+| ------------ | ---- | ------------------------------------- |
+| `<leader>ca` | n, v | Open Actions menu (quick prompts)     |
+| `<leader>cc` | n, v | Toggle chat buffer                    |
+| `<leader>cC` | n    | Create new chat                       |
+| `<leader>cA` | v    | Add selection to existing chat        |
 | `<leader>ci` | n, v | Inline assistant (edit code directly) |
 
 ### Context Sharing Keymaps
 
 These keymaps help you quickly share context with the AI:
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `<leader>cb` | n | Add current buffer content to new chat |
-| `<leader>cb` | v | Add visual selection to chat |
-| `<leader>cf` | n | Show context help (quick slash commands reference) |
-| `<leader>cx` | n | Show all context options (comprehensive help) |
+| Keymap       | Mode | Description                                        |
+| ------------ | ---- | -------------------------------------------------- |
+| `<leader>cb` | n    | Add current buffer content to new chat             |
+| `<leader>cb` | v    | Add visual selection to chat                       |
+| `<leader>cf` | n    | Show context help (quick slash commands reference) |
+| `<leader>cx` | n    | Show all context options (comprehensive help)      |
 
 **Best Practice:** Open chat with `<leader>cc`, then type slash commands interactively for better control. The slash commands open pickers that let you select specific files/buffers.
 
@@ -103,6 +72,7 @@ Variables dynamically insert context into your messages:
 - `#{viewport}` - Your current screen view
 
 **Example usage in chat:**
+
 ```
 Can you help fix the errors in #{buffer:src/main.ts}? Here are the LSP diagnostics: #{lsp}
 ```
@@ -111,17 +81,17 @@ Can you help fix the errors in #{buffer:src/main.ts}? Here are the LSP diagnosti
 
 Slash commands provide additional functionality within chat:
 
-| Command | Description |
-|---------|-------------|
-| `/buffer` | Add buffer(s) to chat |
-| `/file` | Add file(s) from project |
-| `/symbols` | Add file outline (saves tokens) |
-| `/workspace` | Add workspace documentation |
-| `/terminal` | Add latest terminal output |
-| `/help` | Search Vim help docs |
-| `/fetch <url>` | Fetch and add web content |
-| `/memory` | Manage memory groups |
-| `/quickfix` | Share quickfix list |
+| Command        | Description                     |
+| -------------- | ------------------------------- |
+| `/buffer`      | Add buffer(s) to chat           |
+| `/file`        | Add file(s) from project        |
+| `/symbols`     | Add file outline (saves tokens) |
+| `/workspace`   | Add workspace documentation     |
+| `/terminal`    | Add latest terminal output      |
+| `/help`        | Search Vim help docs            |
+| `/fetch <url>` | Fetch and add web content       |
+| `/memory`      | Manage memory groups            |
+| `/quickfix`    | Share quickfix list             |
 
 ### Tools (Agent Capabilities)
 
@@ -169,6 +139,7 @@ nvim/
 ### Adding a New Plugin
 
 1. Add plugin spec to `nvim/lua/plugins/init.lua`:
+
    ```lua
    {
      "author/plugin-name",
@@ -184,6 +155,7 @@ nvim/
 ## Installed Tools
 
 ### LSP Servers
+
 - **Python**: basedpyright
 - **Go**: gopls
 - **TypeScript/JavaScript**: vtsls
@@ -196,6 +168,7 @@ nvim/
 - **Docker**: docker-langserver, docker-compose-language-service
 
 ### Formatters
+
 - **Python**: black, ufmt
 - **Go**: gofumpt, goimports
 - **TypeScript/JavaScript/Svelte**: prettier
@@ -204,11 +177,13 @@ nvim/
 - **Markdown**: markdown-toc
 
 ### Linters
+
 - **Python**: ruff
 - **Bash**: shellcheck
 - **Markdown**: markdownlint-cli2
 
 ### Notable Plugins
+
 - **Treesitter** - Syntax highlighting and code understanding
 - **Telescope** - Fuzzy finder for files, buffers, etc.
 - **nvim-tree** - File explorer
@@ -216,91 +191,97 @@ nvim/
 - **Flash** - Enhanced navigation
 - **Yanky** - Enhanced clipboard with history
 - **ZK** - Zettelkasten note-taking
-- **CodeCompanion** - AI assistant with Copilot
-- **Copilot** - GitHub Copilot integration
+- **CodeCompanion** - AI assistant via LiteLLM/Claude
+- **Copilot** - GitHub Copilot inline suggestions
+- **render-markdown** - Rich markdown rendering in-buffer
+- **image.nvim** - Inline image display (Kitty graphics protocol)
+- **fidget.nvim** - LSP progress notifications
+- **vim-prisma** - Prisma schema support
+- **vim-svelte-plugin** - Enhanced Svelte syntax
+- **SchemaStore.nvim** - JSON/YAML schema catalog for LSP
 
 ## Key Mappings
 
 ### General
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `jk` | i | Exit insert mode |
-| `;` | n | Enter command mode |
-| `<leader>q` | n | Quit all windows |
-| `<leader>Q` | n | Force quit (discard changes) |
+| Keymap      | Mode | Description                  |
+| ----------- | ---- | ---------------------------- |
+| `jk`        | i    | Exit insert mode             |
+| `;`         | n    | Enter command mode           |
+| `<leader>q` | n    | Quit all windows             |
+| `<leader>Q` | n    | Force quit (discard changes) |
+| `gR`        | n    | Global search & replace in buffer (interactive) |
 
 ### File Navigation
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `<leader><leader>` | n | Find files (Telescope) |
-| `<leader>e` | n | Toggle file explorer |
-| `<C-h/j/k/l>` | n | Navigate between windows |
+| Keymap             | Mode | Description              |
+| ------------------ | ---- | ------------------------ |
+| `<leader><leader>` | n    | Find files (Telescope)             |
+| `<leader>e`        | n    | Toggle file explorer               |
+| `<M-h/j/k/l>`      | n    | Navigate between windows (Alt key) |
 
 ### Buffer Management
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `<S-h>` | n | Previous buffer |
-| `<S-l>` | n | Next buffer |
-| `[b` | n | Previous buffer |
-| `]b` | n | Next buffer |
-| `<leader>bn` | n | New buffer |
-| `<leader>bd` | n | Delete buffer |
-| `<leader>bD` | n | Delete buffer and window |
-| `<leader>bo` | n | Delete all other buffers |
-| `<leader>bb` | n | Switch to alternate buffer |
+| Keymap       | Mode | Description                |
+| ------------ | ---- | -------------------------- |
+| `<S-h>`      | n    | Previous buffer            |
+| `<S-l>`      | n    | Next buffer                |
+| `[b`         | n    | Previous buffer            |
+| `]b`         | n    | Next buffer                |
+| `<leader>bn` | n    | New buffer                 |
+| `<leader>bd` | n    | Delete buffer              |
+| `<leader>bD` | n    | Delete buffer and window   |
+| `<leader>bo` | n    | Delete all other buffers   |
+| `<leader>bb` | n    | Switch to alternate buffer |
 
 ### Window Management
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `<leader>wv` | n | Split vertically |
-| `<leader>wh` | n | Split horizontally |
-| `<leader>\|` | n | Split vertically |
-| `<leader>-` | n | Split horizontally |
-| `<leader>wd` | n | Close window |
-| `<leader>w=` | n | Make windows equal size |
+| Keymap       | Mode | Description             |
+| ------------ | ---- | ----------------------- |
+| `<leader>wv` | n    | Split vertically        |
+| `<leader>wh` | n    | Split horizontally      |
+| `<leader>\|` | n    | Split vertically        |
+| `<leader>-`  | n    | Split horizontally      |
+| `<leader>wd` | n    | Close window            |
+| `<leader>w=` | n    | Make windows equal size |
 
 ### LSP
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `gd` | n | Go to definition |
-| `gr` | n | Find references |
-| `gk` | n | Show diagnostic popup |
-| `K` | n | Hover documentation |
-| `<leader>ca` | n, v | Code actions |
-| `<leader>rn` | n | Rename symbol |
+| Keymap       | Mode | Description           |
+| ------------ | ---- | --------------------- |
+| `gd`         | n    | Go to definition      |
+| `gr`         | n    | Find references       |
+| `gk`         | n    | Show diagnostic popup |
+| `K`          | n    | Hover documentation   |
+| `<leader>rn` | n    | Rename symbol         |
 
 ### Flash Navigation
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `s` | n, x, o | Flash jump |
-| `S` | n, x, o | Flash Treesitter |
-| `r` | o | Remote flash |
-| `R` | o, x | Treesitter search |
-| `<C-s>` | c | Toggle flash search |
+| Keymap  | Mode    | Description         |
+| ------- | ------- | ------------------- |
+| `s`     | n, x, o | Flash jump          |
+| `S`     | n, x, o | Flash Treesitter    |
+| `r`     | o       | Remote flash        |
+| `R`     | o, x    | Treesitter search   |
+| `<C-s>` | c       | Toggle flash search |
 
 ### Yanky (Clipboard)
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `p` | n, x | Put after (Yanky) |
-| `P` | n, x | Put before (Yanky) |
-| `<C-n>` | n | Cycle to next yank |
-| `<C-p>` | n | Cycle to previous yank |
+| Keymap  | Mode | Description            |
+| ------- | ---- | ---------------------- |
+| `p`     | n, x | Put after (Yanky)      |
+| `P`     | n, x | Put before (Yanky)     |
+| `<C-n>` | n    | Cycle to next yank     |
+| `<C-p>` | n    | Cycle to previous yank |
 
 ### ZK Note-Taking
 
-| Keymap | Mode | Description |
-|--------|------|-------------|
-| `<leader>zn` | n | Create new note |
-| `<leader>zl` | n | List notes by modified date |
-| `<leader>zf` | n | Find notes |
-| `<leader>zt` | n | Browse tags |
+| Keymap       | Mode | Description                     |
+| ------------ | ---- | ------------------------------- |
+| `<leader>zn` | n    | Create new note (prompts title) |
+| `<leader>zm` | n    | Create new meeting note         |
+| `<leader>zf` | n    | Find/search notes               |
+| `<leader>zt` | n    | Browse tags                     |
 
 **Note**: ZK requires the `zk` CLI tool to be installed. Keymaps are prefixed with `<leader>z`.
 
@@ -308,49 +289,50 @@ nvim/
 
 ### Text Objects
 
-| Command | Description |
-|---------|-------------|
+| Command        | Description                      |
+| -------------- | -------------------------------- |
 | `vi(` or `vi{` | Select inside parentheses/braces |
 | `va(` or `va{` | Select around parentheses/braces |
-| `yi(` or `yi{` | Yank inside parentheses/braces |
-| `ya(` or `ya{` | Yank around parentheses/braces |
-| `viW` | Select until whitespace |
-| `ciw` | Change inner word |
-| `dap` | Delete a paragraph |
+| `yi(` or `yi{` | Yank inside parentheses/braces   |
+| `ya(` or `ya{` | Yank around parentheses/braces   |
+| `viW`          | Select until whitespace          |
+| `ciw`          | Change inner word                |
+| `dap`          | Delete a paragraph               |
 
 ### Navigation
 
-| Command | Description |
-|---------|-------------|
-| `fx` | Jump to next occurrence of 'x' |
-| `Fx` | Jump to previous occurrence of 'x' |
-| `tx` | Jump to before next 'x' |
-| `Tx` | Jump to after previous 'x' |
-| `0` | Jump to start of line |
-| `^` | Jump to first non-blank character |
-| `$` | Jump to end of line |
-| `gg` | Jump to start of file |
-| `G` | Jump to end of file |
-| `%` | Jump to matching bracket |
+| Command | Description                        |
+| ------- | ---------------------------------- |
+| `fx`    | Jump to next occurrence of 'x'     |
+| `Fx`    | Jump to previous occurrence of 'x' |
+| `tx`    | Jump to before next 'x'            |
+| `Tx`    | Jump to after previous 'x'         |
+| `0`     | Jump to start of line              |
+| `^`     | Jump to first non-blank character  |
+| `$`     | Jump to end of line                |
+| `gg`    | Jump to start of file              |
+| `G`     | Jump to end of file                |
+| `%`     | Jump to matching bracket           |
 
 ### Editing
 
-| Command | Description |
-|---------|-------------|
-| `dd` | Delete line |
-| `yy` | Yank (copy) line |
-| `cc` | Change line |
-| `u` | Undo |
-| `<C-r>` | Redo |
-| `.` | Repeat last change |
-| `:%s/old/new/g` | Replace all 'old' with 'new' in file |
-| `:%s/old/new/gc` | Replace with confirmation |
+| Command          | Description                          |
+| ---------------- | ------------------------------------ |
+| `dd`             | Delete line                          |
+| `yy`             | Yank (copy) line                     |
+| `cc`             | Change line                          |
+| `u`              | Undo                                 |
+| `<C-r>`          | Redo                                 |
+| `.`              | Repeat last change                   |
+| `:%s/old/new/g`  | Replace all 'old' with 'new' in file |
+| `:%s/old/new/gc` | Replace with confirmation            |
 
 ## Tips & Tricks
 
 ### Re-source Configuration
 
 After editing a config file:
+
 ```vim
 :so
 ```
@@ -389,6 +371,7 @@ After editing a config file:
 ### Find Plugin Source Code
 
 Plugins are installed in:
+
 ```
 ~/.local/share/nvim/lazy/
 ```
@@ -398,6 +381,7 @@ Browse plugin code to understand commands and functions.
 ### Disable a Plugin
 
 In `nvim/lua/plugins/init.lua`:
+
 ```lua
 {
   "author/plugin-name",
@@ -415,22 +399,26 @@ This config uses NvChad as the base, which includes Lazy.nvim.
 ### Configuration Files Syntax
 
 **Global config:**
+
 ```lua
 vim.g.variable_name = true
 ```
 
 **Options:**
+
 ```lua
 vim.opt.option_name = value
 ```
 
 **Keymaps:**
+
 ```lua
 vim.keymap.set("mode", "keys", "command", { desc = "Description" })
 -- mode: "n" (normal), "i" (insert), "v" (visual), "x" (visual block)
 ```
 
 **LSP/Diagnostics:**
+
 ```lua
 vim.diagnostic.config({ ... })
 vim.lsp.buf.function_name()
@@ -440,11 +428,16 @@ vim.lsp.buf.function_name()
 
 ### Copilot Authentication Issues
 
-If you see "model is not available" errors:
+If Copilot inline suggestions stop working:
+
 ```vim
 :Copilot signout
 :Copilot signin
 ```
+
+### CodeCompanion Not Responding
+
+CodeCompanion uses a local LiteLLM proxy at `http://localhost:4000`. Ensure the proxy is running before using AI features.
 
 ### Plugin Not Loading
 
