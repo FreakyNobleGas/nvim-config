@@ -136,6 +136,64 @@ map("n", "<leader>zf", function()
   )
 end, { desc = "ZK find notes" })
 
+map("n", "<leader>zg", function()
+  local notebook = vim.env.ZK_NOTEBOOK_DIR
+  vim.ui.input({ prompt = "Search note contents: " }, function(query)
+    if not query or query == "" then return end
+    vim.system(
+      { "zk", "list", "--quiet", "--format", "{{title}}\t{{path}}", "--match", query },
+      { text = true, cwd = notebook },
+      function(obj)
+        if obj.code ~= 0 then return end
+        local entries = {}
+        for line in obj.stdout:gmatch "[^\n]+" do
+          local title, path = line:match "^(.-)\t(.+)$"
+          if title and path then
+            table.insert(entries, { title = title, path = notebook .. "/" .. path })
+          end
+        end
+        vim.schedule(function()
+          if #entries == 0 then
+            vim.notify("zk: no notes matching '" .. query .. "'", vim.log.levels.INFO)
+            return
+          end
+          local pickers = require "telescope.pickers"
+          local finders = require "telescope.finders"
+          local conf = require("telescope.config").values
+          local actions = require "telescope.actions"
+          local action_state = require "telescope.actions.state"
+          pickers
+            .new({}, {
+              prompt_title = "ZK Search: " .. query,
+              finder = finders.new_table {
+                results = entries,
+                entry_maker = function(entry)
+                  return {
+                    value = entry.path,
+                    display = entry.title,
+                    ordinal = entry.title,
+                    path = entry.path,
+                  }
+                end,
+              },
+              sorter = conf.generic_sorter {},
+              previewer = conf.file_previewer {},
+              attach_mappings = function(prompt_bufnr)
+                actions.select_default:replace(function()
+                  actions.close(prompt_bufnr)
+                  local sel = action_state.get_selected_entry()
+                  vim.cmd("e " .. vim.fn.fnameescape(sel.path))
+                end)
+                return true
+              end,
+            })
+            :find()
+        end)
+      end
+    )
+  end)
+end, { desc = "ZK grep note contents" })
+
 map("n", "<leader>zt", function()
   local notebook = vim.env.ZK_NOTEBOOK_DIR
   vim.system({ "zk", "tag", "list", "--quiet", "--format", "{{name}}" }, { text = true, cwd = notebook }, function(obj)
