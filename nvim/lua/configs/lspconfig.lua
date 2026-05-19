@@ -34,6 +34,9 @@ local servers = {
 
   -- Groovy / Jenkins
   "groovyls",
+
+  -- Ruby
+  "solargraph",
 }
 
 -- Configure basedpyright with standard type checking and performance optimizations

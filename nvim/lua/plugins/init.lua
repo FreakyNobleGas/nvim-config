@@ -74,6 +74,7 @@ return {
         "dockerfile-language-server",
         "docker-compose-language-service",
         "groovy-language-server",
+        "solargraph",
 
         -- Groovy / Jenkins
         "npm-groovy-lint",
@@ -154,6 +155,7 @@ return {
         "bash",
         "dockerfile",
         "groovy",
+        "ruby",
       },
     },
   },
