@@ -6,6 +6,7 @@ lint.linters_by_ft = {
   markdown = { "markdownlint-cli2" },
   dockerfile = { "hadolint" },
   sh = { "shellcheck" },
+  groovy = { "npm_groovy_lint" },
 }
 
 -- Markdownlint config

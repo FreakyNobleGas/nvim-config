@@ -31,6 +31,9 @@ local servers = {
   -- Docker
   "dockerls",
   "docker_compose_language_service",
+
+  -- Groovy / Jenkins
+  "groovyls",
 }
 
 -- Configure basedpyright with standard type checking and performance optimizations

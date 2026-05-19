@@ -57,7 +57,8 @@ return {
 
   -- Mason auto-installer
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
+    event = "VimEnter",
     opts = {
       ensure_installed = {
         -- LSP Servers
@@ -70,8 +71,12 @@ return {
         "yaml-language-server",
         "vtsls",
         "svelte-language-server",
-        "docker-langserver",
+        "dockerfile-language-server",
         "docker-compose-language-service",
+        "groovy-language-server",
+
+        -- Groovy / Jenkins
+        "npm-groovy-lint",
 
         -- Linters
         "ruff",
@@ -91,6 +96,18 @@ return {
         "markdown-toc",
       },
     },
+    config = function(_, opts)
+      require("mason").setup(vim.tbl_deep_extend("force", require("nvchad.configs.mason"), opts))
+      local mr = require "mason-registry"
+      mr.refresh(function()
+        for _, tool in ipairs(opts.ensure_installed) do
+          local ok, p = pcall(mr.get_package, tool)
+          if ok and not p:is_installed() then
+            p:install()
+          end
+        end
+      end)
+    end,
   },
 
   -- Linting
@@ -136,6 +153,7 @@ return {
         -- Other
         "bash",
         "dockerfile",
+        "groovy",
       },
     },
   },

@@ -1,5 +1,14 @@
 require "nvchad.autocmds"
 
+vim.filetype.add({
+  filename = {
+    ["Jenkinsfile"] = "groovy",
+  },
+  pattern = {
+    ["Jenkinsfile%..*"] = "groovy",
+  },
+})
+
 -- Fix nvim-treesitter master branch compatibility with Neovim 0.12.0.
 -- In 0.12.0, directive/predicate callbacks receive captures as TSNode[]
 -- arrays instead of a single TSNode. Override the three broken directives
