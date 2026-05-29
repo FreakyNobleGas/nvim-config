@@ -93,4 +93,15 @@ vim.lsp.config.basedpyright = {
   },
 }
 
+vim.lsp.config.groovyls = {
+  cmd = {
+    "java",
+    "--sun-misc-unsafe-memory-access=allow", -- suppress classgraph deprecation warning on Java 23+
+    "-jar",
+    vim.fn.stdpath("data") .. "/mason/packages/groovy-language-server/build/libs/groovy-language-server-all.jar",
+  },
+  filetypes = { "groovy" },
+  root_markers = { "Jenkinsfile", ".git" },
+}
+
 vim.lsp.enable(servers)

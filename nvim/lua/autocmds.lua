@@ -1,5 +1,21 @@
 require "nvchad.autocmds"
 
+-- which-key clears its buffer trigger cache on every LspAttach. When it
+-- rebuilds, is_safe() returns false for <Space> if a <Nop> keymap is present
+-- (node.keymap is truthy), so the trigger never gets re-added. Scheduling a
+-- wk_buf.get() call after all LspAttach handlers complete forces a Mode.new →
+-- update → attach cycle, which re-adds the <Space> trigger cleanly.
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    vim.schedule(function()
+      local ok, wk_buf = pcall(require, "which-key.buf")
+      if ok and vim.api.nvim_buf_is_valid(args.buf) then
+        wk_buf.get({ buf = args.buf })
+      end
+    end)
+  end,
+})
+
 vim.filetype.add({
   filename = {
     ["Jenkinsfile"] = "groovy",
