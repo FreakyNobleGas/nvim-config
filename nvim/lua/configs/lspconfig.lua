@@ -43,7 +43,18 @@ local servers = {
 vim.lsp.config.basedpyright = {
   cmd = { "basedpyright-langserver", "--stdio" },
   filetypes = { "python" },
-  root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", "pyrightconfig.json", ".git" },
+  -- uv.lock is at the app root (alongside pyproject.toml) in UV projects.
+  -- Listing it first ensures we anchor at the correct project boundary.
+  root_markers = { "uv.lock", "pyrightconfig.json", "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" },
+  before_init = function(_, config)
+    -- Explicitly point basedpyright at the UV-managed venv so that
+    -- path-sourced packages (e.g. libs/* installed via [tool.uv.sources])
+    -- are visible and imports resolve correctly.
+    local venv_python = config.root_dir .. "/.venv/bin/python"
+    if vim.uv.fs_stat(venv_python) then
+      config.settings.basedpyright.pythonPath = venv_python
+    end
+  end,
   settings = {
     basedpyright = {
       analysis = {
