@@ -47,12 +47,39 @@ vim.lsp.config.basedpyright = {
   -- Listing it first ensures we anchor at the correct project boundary.
   root_markers = { "uv.lock", "pyrightconfig.json", "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" },
   before_init = function(_, config)
-    -- Explicitly point basedpyright at the UV-managed venv so that
-    -- path-sourced packages (e.g. libs/* installed via [tool.uv.sources])
-    -- are visible and imports resolve correctly.
-    local venv_python = config.root_dir .. "/.venv/bin/python"
-    if vim.uv.fs_stat(venv_python) then
-      config.settings.basedpyright.pythonPath = venv_python
+    local root = config.root_dir
+    local venv_python = root .. "/.venv/bin/python"
+    if not vim.uv.fs_stat(venv_python) then return end
+
+    -- Explicitly point basedpyright at the UV-managed venv.
+    config.settings.basedpyright.pythonPath = venv_python
+
+    -- Editable installs using setuptools PEP 660 register an import hook rather
+    -- than adding a path to sys.path. basedpyright can't follow hooks statically,
+    -- so read direct_url.json from each dist-info to find the real source root.
+    local sp_dirs = vim.fn.glob(root .. "/.venv/lib/python*/site-packages", false, true)
+    if #sp_dirs == 0 then return end
+
+    local extra_paths = {}
+    for _, dist_info in ipairs(vim.fn.glob(sp_dirs[1] .. "/*.dist-info", false, true)) do
+      local f = io.open(dist_info .. "/direct_url.json", "r")
+      if f then
+        local content = f:read("*all")
+        f:close()
+        if content:match('"editable"%s*:%s*true') then
+          local url = content:match('"url"%s*:%s*"([^"]+)"')
+          if url and url:match("^file://") then
+            local path = url:gsub("^file://", "")
+            local src = path .. "/src"
+            table.insert(extra_paths, vim.uv.fs_stat(src) and src or path)
+          end
+        end
+      end
+    end
+
+    if #extra_paths > 0 then
+      local analysis = config.settings.basedpyright.analysis
+      analysis.extraPaths = vim.list_extend(analysis.extraPaths or {}, extra_paths)
     end
   end,
   settings = {
