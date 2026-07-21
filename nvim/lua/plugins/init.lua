@@ -1,5 +1,5 @@
 return {
-  -- Progress/notification UI (LSP + CodeCompanion thinking indicator)
+  -- Progress/notification UI (LSP progress)
   {
     "j-hui/fidget.nvim",
     event = "VeryLazy",
@@ -73,6 +73,7 @@ return {
         "svelte-language-server",
         "dockerfile-language-server",
         "docker-compose-language-service",
+        "helm-ls",
         "groovy-language-server",
         "solargraph",
 
@@ -206,13 +207,13 @@ return {
   -- Markdown rendering
   {
     "MeanderingProgrammer/render-markdown.nvim",
-    ft = { "markdown", "codecompanion" },
+    ft = { "markdown" },
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "3rd/image.nvim",
     },
     opts = {
-      file_types = { "markdown", "codecompanion" },
+      file_types = { "markdown" },
       heading = {
         enabled = true,
         sign = true,
@@ -299,122 +300,6 @@ return {
     },
   },
 
-  -- Copilot
-  {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
-    opts = {
-      suggestion = { enabled = false },
-      panel = { enabled = false },
-    },
-  },
-
-  -- CodeCompanion AI Assistant
-  {
-    "olimorris/codecompanion.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-telescope/telescope.nvim", -- For pickers
-    },
-    cmd = {
-      "CodeCompanion",
-      "CodeCompanionChat",
-      "CodeCompanionActions",
-    },
-    opts = {
-      -- LiteLLM proxy adapters using Anthropic format (avoids OpenAI tool_use translation issues)
-      adapters = {
-        http = {
-          litellm = function()
-            local adapter = require("codecompanion.adapters").extend("anthropic", {
-              url = "http://localhost:4000/v1/messages",
-              env = {
-                api_key = "sk-local-test",
-              },
-              schema = {
-                model = {
-                  default = "claude-sonnet",
-                },
-              },
-            })
-            -- LiteLLM rejects top-level cache_control; wrap form_messages to strip it
-            local orig = adapter.handlers.form_messages
-            adapter.handlers.form_messages = function(self, messages)
-              local result = orig(self, messages)
-              if result then result.cache_control = nil end
-              return result
-            end
-            return adapter
-          end,
-          litellm_haiku = function()
-            local adapter = require("codecompanion.adapters").extend("anthropic", {
-              url = "http://localhost:4000/v1/messages",
-              env = {
-                api_key = "sk-local-test",
-              },
-              schema = {
-                model = {
-                  default = "claude-haiku",
-                },
-              },
-            })
-            local orig = adapter.handlers.form_messages
-            adapter.handlers.form_messages = function(self, messages)
-              local result = orig(self, messages)
-              if result then result.cache_control = nil end
-              return result
-            end
-            return adapter
-          end,
-        },
-      },
-
-      -- claude-sonnet for chat/tasks, claude-haiku for inline (faster)
-      strategies = {
-        chat = {
-          adapter = "litellm",
-        },
-        inline = {
-          adapter = "litellm_haiku",
-        },
-        cmd = {
-          adapter = "litellm",
-        },
-      },
-
-      -- Display options
-      display = {
-        chat = {
-          window = {
-            layout = "vertical", -- or "horizontal", "float"
-            width = 0.45,
-          },
-          start_in_insert_mode = true, -- Auto-enter insert mode when opening chat
-          show_reasoning = false, -- Disable rendering of thought process for better performance
-        },
-      },
-
-      -- Memory configuration for persistent context
-      memory = {
-        ai_context = {
-          description = "Project and user AI context files",
-          files = {
-            -- Project-level context (create this in your project root)
-            { path = "AI_CONTEXT.md", parser = "none" },
-            -- User-level preferences (create in ~/.config/nvim/ if desired)
-            { path = "~/.config/nvim/AI_CONTEXT.md", parser = "none" },
-          },
-          is_default = true,
-        },
-      },
-
-      -- Optional: Enable debug logging (change to "DEBUG" for troubleshooting)
-      log_level = "INFO",
-    },
-  },
-
   -- Yanky for enhanced clipboard
   {
     "gbprod/yanky.nvim",
@@ -427,6 +312,12 @@ return {
   -- Prisma support
   {
     "prisma/vim-prisma",
+    lazy = false,
+  },
+
+  -- Helm chart support (filetype detection + syntax highlighting)
+  {
+    "towolf/vim-helm",
     lazy = false,
   },
 

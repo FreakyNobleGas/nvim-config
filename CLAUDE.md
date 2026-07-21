@@ -1,6 +1,6 @@
 # AI Context for nvim-config
 
-This file provides persistent context to CodeCompanion AI assistant across all chat sessions.
+This file provides persistent context and conventions for AI assistants working in this repo.
 
 ## Project Overview
 
@@ -47,6 +47,28 @@ This is a personal Neovim configuration using NvChad as the base framework.
 1. Add entry to `nvim/lua/plugins/init.lua`
 2. Add keymaps to `nvim/lua/mappings.lua` if needed
 3. Add any configuration files to `nvim/lua/configs/` if complex
+
+### Deploying config changes to the local system
+This repo is the source of truth; the live config lives at `~/.config/nvim`
+(a plain copy, not a symlink). After editing files under `nvim/`, sync the
+whole tree across so changes take effect. Use `rsync` with `--delete` so files
+removed from the repo are also removed locally:
+
+```sh
+rsync -a --delete --exclude='.git' --exclude='lazy-lock.json' nvim/ ~/.config/nvim/
+```
+
+Verify the two trees are in sync with
+`diff -rq nvim ~/.config/nvim` (ignore `.git` and `lazy-lock.json`).
+Then restart Neovim and run `:Lazy sync` / `:Mason` if plugins or tools changed.
+
+### Creating a mock project to test filetype / LSP features
+When adding support for a new filetype or language server, create a minimal
+throwaway fixture under `/tmp` to test against. For example, a Helm chart at
+`/tmp/helm-test-chart` with `Chart.yaml`, `values.yaml`, and
+`templates/` (including a `.tpl` helper and templated `*.yaml`) exercises
+filetype detection, syntax highlighting, and LSP attachment. Verify with
+`:set filetype?`, `:LspInfo`, and `:lua vim.diagnostic.setqflist()`.
 
 ### Debugging issues
 - LSP logs: `:LspLog`

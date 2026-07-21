@@ -32,6 +32,9 @@ local servers = {
   "dockerls",
   "docker_compose_language_service",
 
+  -- Helm
+  "helm_ls",
+
   -- Groovy / Jenkins
   "groovyls",
 

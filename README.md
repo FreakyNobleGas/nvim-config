@@ -6,7 +6,6 @@ Personal Neovim configuration built on [NvChad](https://nvchad.com/), optimized 
 
 - [Quick Start](#quick-start)
 - [Neovim Version Migration](#neovim-version-migration)
-- [CodeCompanion AI Assistant](#codecompanion-ai-assistant)
 - [Configuration Structure](#configuration-structure)
 - [Installed Tools](#installed-tools)
 - [Key Mappings](#key-mappings)
@@ -34,87 +33,6 @@ Personal Neovim configuration built on [NvChad](https://nvchad.com/), optimized 
 
 Should report "No deprecated functions detected".
 
-## CodeCompanion AI Assistant
-
-CodeCompanion provides AI-powered coding assistance via a local [LiteLLM](https://github.com/BerriAI/litellm) proxy using Claude (Anthropic) models. Chat and agent tasks use `claude-sonnet`; inline edits use `claude-haiku` for faster responses.
-
-### Core Keymaps
-
-| Keymap       | Mode | Description                           |
-| ------------ | ---- | ------------------------------------- |
-| `<leader>ca` | n, v | Open Actions menu (quick prompts)     |
-| `<leader>cc` | n, v | Toggle chat buffer                    |
-| `<leader>cC` | n    | Create new chat                       |
-| `<leader>cA` | v    | Add selection to existing chat        |
-| `<leader>ci` | n, v | Inline assistant (edit code directly) |
-
-### Context Sharing Keymaps
-
-These keymaps help you quickly share context with the AI:
-
-| Keymap       | Mode | Description                                        |
-| ------------ | ---- | -------------------------------------------------- |
-| `<leader>cb` | n    | Add current buffer content to new chat             |
-| `<leader>cb` | v    | Add visual selection to chat                       |
-| `<leader>cf` | n    | Show context help (quick slash commands reference) |
-| `<leader>cx` | n    | Show all context options (comprehensive help)      |
-
-**Best Practice:** Open chat with `<leader>cc`, then type slash commands interactively for better control. The slash commands open pickers that let you select specific files/buffers.
-
-### Variables (Use in Chat Buffer)
-
-Variables dynamically insert context into your messages:
-
-- `#{buffer}` - Current buffer content
-- `#{buffer:filename}` - Specific file by name
-- `#{buffer:path/to/file}` - Specific file by path
-- `#{lsp}` - LSP diagnostics and errors
-- `#{viewport}` - Your current screen view
-
-**Example usage in chat:**
-
-```
-Can you help fix the errors in #{buffer:src/main.ts}? Here are the LSP diagnostics: #{lsp}
-```
-
-### Slash Commands (Use in Chat Buffer)
-
-Slash commands provide additional functionality within chat:
-
-| Command        | Description                     |
-| -------------- | ------------------------------- |
-| `/buffer`      | Add buffer(s) to chat           |
-| `/file`        | Add file(s) from project        |
-| `/symbols`     | Add file outline (saves tokens) |
-| `/workspace`   | Add workspace documentation     |
-| `/terminal`    | Add latest terminal output      |
-| `/help`        | Search Vim help docs            |
-| `/fetch <url>` | Fetch and add web content       |
-| `/memory`      | Manage memory groups            |
-| `/quickfix`    | Share quickfix list             |
-
-### Tools (Agent Capabilities)
-
-Tools enable the AI to interact with your codebase autonomously:
-
-- `@{files}` - Bundle of file operation tools
-- `@read_file` - Read file contents
-- `@file_search` - Search for files
-- `@grep_search` - Search file contents
-- `@list_code_usages` - Find symbol references (LSP)
-- `@get_changed_files` - Show git diffs
-
-**Note:** File operation tools are automatically enabled in all chats.
-
-### AI Context Files
-
-The configuration automatically loads context from these files if they exist:
-
-- `AI_CONTEXT.md` - Project-level context (in project root)
-- `~/.config/nvim/AI_CONTEXT.md` - Global preferences
-
-Edit these files to provide persistent context about your coding standards, project architecture, and preferences. The AI will reference them in all chats.
-
 ## Configuration Structure
 
 ```
@@ -133,7 +51,7 @@ nvim/
 │   │   └── nvim-tree.lua        # File explorer config
 │   └── plugins/
 │       └── init.lua             # Plugin declarations
-└── AI_CONTEXT.md                # Persistent AI context
+└── CLAUDE.md                    # Persistent AI context
 ```
 
 ### Adding a New Plugin
@@ -191,8 +109,6 @@ nvim/
 - **Flash** - Enhanced navigation
 - **Yanky** - Enhanced clipboard with history
 - **ZK** - Zettelkasten note-taking
-- **CodeCompanion** - AI assistant via LiteLLM/Claude
-- **Copilot** - GitHub Copilot inline suggestions
 - **render-markdown** - Rich markdown rendering in-buffer
 - **image.nvim** - Inline image display (Kitty graphics protocol)
 - **fidget.nvim** - LSP progress notifications
@@ -426,19 +342,6 @@ vim.lsp.buf.function_name()
 
 ## Troubleshooting
 
-### Copilot Authentication Issues
-
-If Copilot inline suggestions stop working:
-
-```vim
-:Copilot signout
-:Copilot signin
-```
-
-### CodeCompanion Not Responding
-
-CodeCompanion uses a local LiteLLM proxy at `http://localhost:4000`. Ensure the proxy is running before using AI features.
-
 ### Plugin Not Loading
 
 1. Check if lazy-loaded: `:Lazy`
@@ -463,7 +366,6 @@ CodeCompanion uses a local LiteLLM proxy at `http://localhost:4000`. Ensure the 
 - [NvChad Documentation](https://nvchad.com/)
 - [Neovim Documentation](https://neovim.io/doc/)
 - [Vim Cheatsheet](https://vim.rtorr.com/)
-- [CodeCompanion Docs](https://codecompanion.olimorris.dev/)
 
 ## License
 
