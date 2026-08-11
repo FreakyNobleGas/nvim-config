@@ -40,7 +40,7 @@ local options = {
     sh = { "shfmt" },
 
     -- Groovy / Jenkins
-    groovy = { "npm_groovy_lint" },
+    groovy = { "npm-groovy-lint" },
   },
 
   format_on_save = {
