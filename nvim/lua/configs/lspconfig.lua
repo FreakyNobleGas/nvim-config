@@ -42,48 +42,128 @@ local servers = {
   "solargraph",
 }
 
+-- Import-resolution support for nx-style UV monorepos (apps/* and libs/* are
+-- each standalone UV projects, wired together by editable path dependencies).
+--
+-- basedpyright resolves imports statically and does not execute the interpreter,
+-- read .pth files, or follow the import hooks that PEP 660 editable installs
+-- register. Left alone it reports "could not be resolved" for every cross-package
+-- import, which breaks go-to-definition. So we discover the real source trees
+-- ourselves and hand them over as analysis.extraPaths.
+
+-- Turn a file:// URL from a dist-info direct_url.json into a filesystem path.
+local function file_url_to_path(url)
+  local path = url:gsub("^file://", "")
+  return (path:gsub("%%(%x%x)", function(hex)
+    return string.char(tonumber(hex, 16))
+  end))
+end
+
+-- A src-layout package puts its modules under <project>/src; a flat-layout one
+-- puts them at the project root. Prefer src when it exists.
+local function import_root(project_dir)
+  local src = project_dir .. "/src"
+  return vim.uv.fs_stat(src) and src or project_dir
+end
+
+-- Source 1: the venv. Catches transitive path dependencies, which only show up
+-- once something has actually been installed.
+local function venv_editable_paths(venv)
+  local paths = {}
+  for _, site_packages in ipairs(vim.fn.glob(venv .. "/lib/python*/site-packages", false, true)) do
+    for _, dist_info in ipairs(vim.fn.glob(site_packages .. "/*.dist-info", false, true)) do
+      local f = io.open(dist_info .. "/direct_url.json", "r")
+      if f then
+        local content = f:read "*a"
+        f:close()
+        local url = content:match '"editable"%s*:%s*true' and content:match '"url"%s*:%s*"([^"]+)"'
+        if url and url:match "^file://" then
+          table.insert(paths, import_root(file_url_to_path(url)))
+        end
+      end
+    end
+  end
+  return paths
+end
+
+-- Source 2: [tool.uv.sources] in pyproject.toml. Needed because a standalone lib
+-- in libs/ often has no .venv of its own -- only apps get synced -- and without
+-- this, navigating from one lib into another resolves nothing.
+--
+-- Recurses so a chain of libs resolves, with a depth cap and a seen-set as the
+-- guard against cyclic path dependencies.
+local function uv_source_paths(project_dir, paths, seen, depth)
+  paths, seen, depth = paths or {}, seen or {}, depth or 0
+  if depth > 4 or seen[project_dir] then return paths end
+  seen[project_dir] = true
+
+  local f = io.open(project_dir .. "/pyproject.toml", "r")
+  if not f then return paths end
+  local content = f:read "*a"
+  f:close()
+
+  -- Isolate the [tool.uv.sources] table so `path = ...` keys belonging to other
+  -- sections (e.g. [tool.hatch...]) are not picked up.
+  local section = content:match "\n%s*%[tool%.uv%.sources%]%s*\n(.-)\n%s*%[" or content:match "\n%s*%[tool%.uv%.sources%]%s*\n(.*)$"
+  if not section then return paths end
+
+  for rel in section:gmatch 'path%s*=%s*"([^"]+)"' do
+    local dep = vim.fs.normalize(rel:match "^/" and rel or (project_dir .. "/" .. rel))
+    if vim.uv.fs_stat(dep) then
+      table.insert(paths, import_root(dep))
+      uv_source_paths(dep, paths, seen, depth + 1)
+    end
+  end
+  return paths
+end
+
+-- The pristine extraPaths, resolved against whatever the project root is.
+-- before_init always rebuilds from this constant rather than appending to
+-- whatever is currently in settings, so one project's discovered paths cannot
+-- accumulate into the next client's.
+local base_extra_paths = { ".", "src" }
+
 -- Configure basedpyright with standard type checking and performance optimizations
 vim.lsp.config.basedpyright = {
   cmd = { "basedpyright-langserver", "--stdio" },
   filetypes = { "python" },
-  -- uv.lock is at the app root (alongside pyproject.toml) in UV projects.
-  -- Listing it first ensures we anchor at the correct project boundary.
+  -- Flat lists carry no priority: Neovim picks the *nearest* ancestor holding
+  -- any of these. That is what we want here -- it anchors at the individual
+  -- app/lib rather than climbing to the monorepo root -- with .git last so it
+  -- only applies when nothing more specific exists.
   root_markers = { "uv.lock", "pyrightconfig.json", "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" },
   before_init = function(_, config)
     local root = config.root_dir
-    local venv_python = root .. "/.venv/bin/python"
-    if not vim.uv.fs_stat(venv_python) then return end
+    if not root then return end
 
-    -- Explicitly point basedpyright at the UV-managed venv.
-    config.settings.basedpyright.pythonPath = venv_python
+    -- Assign into the existing settings tables. Replacing config.settings
+    -- wholesale does not propagate -- the client keeps the original reference
+    -- and none of this would reach the server.
 
-    -- Editable installs using setuptools PEP 660 register an import hook rather
-    -- than adding a path to sys.path. basedpyright can't follow hooks statically,
-    -- so read direct_url.json from each dist-info to find the real source root.
-    local sp_dirs = vim.fn.glob(root .. "/.venv/lib/python*/site-packages", false, true)
-    if #sp_dirs == 0 then return end
+    -- Prefer a venv at the project root, then the nearest one above it (a
+    -- workspace may keep a single shared venv), then an active $VIRTUAL_ENV.
+    local venv = vim.fs.find(".venv", { path = root, upward = true, type = "directory", limit = 1 })[1]
+    if not (venv and vim.uv.fs_stat(venv .. "/bin/python")) then
+      venv = vim.env.VIRTUAL_ENV
+    end
 
-    local extra_paths = {}
-    for _, dist_info in ipairs(vim.fn.glob(sp_dirs[1] .. "/*.dist-info", false, true)) do
-      local f = io.open(dist_info .. "/direct_url.json", "r")
-      if f then
-        local content = f:read("*all")
-        f:close()
-        if content:match('"editable"%s*:%s*true') then
-          local url = content:match('"url"%s*:%s*"([^"]+)"')
-          if url and url:match("^file://") then
-            local path = url:gsub("^file://", "")
-            local src = path .. "/src"
-            table.insert(extra_paths, vim.uv.fs_stat(src) and src or path)
-          end
-        end
+    if venv and vim.uv.fs_stat(venv .. "/bin/python") then
+      -- basedpyright reads the interpreter from `python.pythonPath`. The
+      -- `basedpyright.pythonPath` key it is often written to is silently ignored.
+      config.settings.python = { pythonPath = venv .. "/bin/python" }
+    end
+
+    local discovered = venv and venv_editable_paths(venv) or {}
+    vim.list_extend(discovered, uv_source_paths(root))
+
+    local merged, seen = {}, {}
+    for _, p in ipairs(vim.list_extend(vim.deepcopy(base_extra_paths), discovered)) do
+      if not seen[p] then
+        seen[p] = true
+        table.insert(merged, p)
       end
     end
-
-    if #extra_paths > 0 then
-      local analysis = config.settings.basedpyright.analysis
-      analysis.extraPaths = vim.list_extend(analysis.extraPaths or {}, extra_paths)
-    end
+    config.settings.basedpyright.analysis.extraPaths = merged
   end,
   settings = {
     basedpyright = {
@@ -93,13 +173,8 @@ vim.lsp.config.basedpyright = {
         useLibraryCodeForTypes = true,
         autoImportCompletions = true,
         diagnosticMode = "openFilesOnly",
-        -- Add extra paths to match pytest.ini configuration
-        extraPaths = {
-          ".",
-          "src/runtime",
-          "tests/unit",
-          "tests/infrastructure",
-        },
+        -- Rebuilt per-project in before_init; see base_extra_paths above.
+        extraPaths = vim.deepcopy(base_extra_paths),
         -- Exclude common directories that slow down indexing
         exclude = {
           "**/node_modules",

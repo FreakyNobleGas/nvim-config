@@ -70,6 +70,49 @@ throwaway fixture under `/tmp` to test against. For example, a Helm chart at
 filetype detection, syntax highlighting, and LSP attachment. Verify with
 `:set filetype?`, `:LspInfo`, and `:lua vim.diagnostic.setqflist()`.
 
+#### Python: nx-style uv monorepo fixture
+`./scripts/make-python-monorepo-fixture.sh [target-dir]` scaffolds a monorepo at
+`/tmp/nx-uv-fixture` that mirrors the work project: `apps/*` and `libs/*` are
+each **standalone uv projects**, wired together by `[tool.uv.sources]` path
+entries installed as editable. Only apps get `uv sync`'d, matching the usual
+state of such a repo; pass `SYNC_LIBS=1` to give each lib its own `.venv` too.
+
+The fixture deliberately covers four navigation directions, because they do not
+share a code path:
+
+| | From | Import |
+| --- | --- | --- |
+| A | `apps/api/src/api/main.py` | `from shared_models.models import Widget` |
+| B | `apps/api/src/api/flat_import.py` | `from shared_models import Widget` (re-export) |
+| C | `apps/api/tests/test_main.py` | same, from outside `src/` |
+| D | `libs/shared-models/.../models.py` | `from shared_utils.helpers import Helper` |
+
+**D is the case that broke.** basedpyright anchors at the *nearest* root marker,
+so a file inside a lib gets `root_dir = libs/shared-models` — which has no
+`.venv`. Any logic keyed off `<root>/.venv` finds nothing and the import goes
+unresolved. This is why `before_init` in `configs/lspconfig.lua` reads
+`[tool.uv.sources]` from `pyproject.toml` as well as scanning the venv: the
+TOML source works without anything being installed.
+
+Things worth knowing when testing this:
+- basedpyright never runs the interpreter, reads `.pth` files, or follows PEP 660
+  import hooks. Cross-package imports resolve **only** via `analysis.extraPaths`.
+- The interpreter must go to `settings.python.pythonPath`.
+  `settings.basedpyright.pythonPath` is silently ignored.
+- On macOS `/tmp` is a symlink to `/private/tmp`, so `root_dir` and the paths in
+  `direct_url.json` come back as `/private/tmp/...`. Expected, not a bug.
+- `uv sync` must be re-run in the app after a lib's *metadata* changes; editing a
+  lib's source needs no sync, since `extraPaths` points at the live tree.
+- After changing `configs/lspconfig.lua`, rsync to `~/.config/nvim` (above) and
+  restart — `:LspRestart` alone will not re-run `before_init` with new code.
+
+To check what the server actually received, rather than guessing from behaviour:
+
+```vim
+:lua =vim.lsp.get_clients({ name = "basedpyright" })[1].config.root_dir
+:lua =vim.lsp.get_clients({ name = "basedpyright" })[1].settings
+```
+
 ### Debugging issues
 - LSP logs: `:LspLog`
 - Check lazy loading: `:Lazy`
