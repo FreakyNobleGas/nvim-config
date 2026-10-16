@@ -33,6 +33,17 @@ end, { desc = "Global replace in buffer" })
 -- File explorer
 map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" })
 
+-- File utilities
+map("n", "<leader>fc", function()
+  local path = vim.fn.expand "%:p"
+  if path == "" then
+    vim.notify("No file path for this buffer", vim.log.levels.WARN)
+    return
+  end
+  vim.fn.setreg("+", path)
+  vim.notify("Copied: " .. path)
+end, { desc = "Copy full file path" })
+
 -- Window management
 map("n", "<leader>wv", "<cmd>vsplit<CR>", { desc = "Split window vertically" })
 map("n", "<leader>wh", "<cmd>split<CR>", { desc = "Split window horizontally" })
