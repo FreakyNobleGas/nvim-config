@@ -8,8 +8,10 @@ require "nvchad.autocmds"
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(args)
     vim.schedule(function()
+      -- which-key finishes its own setup in a scheduled callback; until then its
+      -- trigger config is nil, and it builds triggers fresh once it loads anyway.
       local ok, wk_buf = pcall(require, "which-key.buf")
-      if ok and vim.api.nvim_buf_is_valid(args.buf) then
+      if ok and require("which-key.config").loaded and vim.api.nvim_buf_is_valid(args.buf) then
         wk_buf.get({ buf = args.buf })
       end
     end)

@@ -87,7 +87,6 @@ return {
 
         -- Formatters
         "black",
-        "ufmt",
         "gofumpt",
         "goimports",
         "shfmt",
@@ -293,9 +292,6 @@ return {
         padding = 0,
         head = "RenderMarkdownTableHead",
         row = "RenderMarkdownTableRow",
-      },
-      image = {
-        enabled = true,
       },
     },
   },

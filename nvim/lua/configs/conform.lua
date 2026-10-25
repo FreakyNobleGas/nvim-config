@@ -13,7 +13,9 @@ local options = {
           local content = handle:read "*all"
           handle:close()
           if content:match "%[tool%.ufmt%]" or content:match "ufmt" then
-            return { "ufmt" }
+            -- ufmt is not in the Mason registry; it must come from the project venv.
+            -- Fall back to black (which ufmt wraps) when it is not on PATH.
+            return { "ufmt", "black", stop_after_first = true }
           end
           if content:match "%[tool%.ruff%]" or content:match "%[tool%.ruff%.format%]" then
             return { "ruff_organize_imports", "ruff_format" }
