@@ -32,6 +32,9 @@ end, { desc = "Global replace in buffer" })
 
 -- File explorer
 map("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" })
+map("n", "<leader>fp", function()
+  require("configs.nx-projects").pick()
+end, { desc = "Find nx project (reveal in tree)" })
 
 -- File utilities
 map("n", "<leader>fc", function()
