@@ -160,3 +160,65 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     end
   end,
 })
+
+-- Open nvim-tree on startup when working in a project: a bare `nvim`, a
+-- directory, or a file inside a git repo. One-off edits (commit messages, diffs,
+-- stdin, temp files from crontab/kubectl) are left alone.
+vim.api.nvim_create_autocmd("StdinReadPre", {
+  callback = function()
+    vim.g.started_with_stdin = true
+  end,
+})
+
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    -- Scheduled so nvdash has already replaced the startup buffer
+    vim.schedule(function()
+      if vim.o.diff or vim.g.started_with_stdin then
+        return
+      end
+      local arg = vim.fn.argv(0)
+      if vim.fn.argc() == 0 then
+        require("nvim-tree.api").tree.open()
+      elseif vim.fn.isdirectory(arg) == 1 then
+        vim.cmd.cd(arg)
+        require("nvim-tree.api").tree.open()
+      else
+        local ft = vim.bo.filetype
+        if ft == "gitcommit" or ft == "gitrebase" then
+          return
+        end
+        if vim.bo.buftype ~= "" or not vim.fs.root(0, ".git") then
+          return
+        end
+        require("nvim-tree.api").tree.toggle { focus = false, find_file = true }
+      end
+    end)
+  end,
+})
+
+-- Close the tree when quitting the last other window in the tab, so `:q`
+-- exits Neovim instead of leaving the tree on its own. Matched by filetype so
+-- this never forces nvim-tree to load.
+vim.api.nvim_create_autocmd("QuitPre", {
+  callback = function()
+    -- Quitting the tree itself: closing it here would make `:q` close the
+    -- file window instead
+    if vim.bo.filetype == "NvimTree" then
+      return
+    end
+    local tree_wins, others = {}, 0
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      if vim.bo[vim.api.nvim_win_get_buf(win)].filetype == "NvimTree" then
+        table.insert(tree_wins, win)
+      elseif vim.api.nvim_win_get_config(win).relative == "" then
+        others = others + 1
+      end
+    end
+    if others == 1 then
+      for _, win in ipairs(tree_wins) do
+        vim.api.nvim_win_close(win, true)
+      end
+    end
+  end,
+})

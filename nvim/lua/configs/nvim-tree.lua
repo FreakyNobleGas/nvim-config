@@ -26,6 +26,18 @@ local options = {
     enable = true,        -- Highlight current file in tree
     update_root = false,  -- Don't change root when switching files
   },
+  actions = {
+    open_file = {
+      window_picker = {
+        exclude = {
+          filetype = { "notify", "packer", "qf", "diff", "fugitive", "fugitiveblame", "checkhealth" },
+          -- "nofile" is dropped from the defaults so the nvdash dashboard (a
+          -- scratch buffer) is replaced by the opened file, not left beside a new split
+          buftype = { "terminal", "help" },
+        },
+      },
+    },
+  },
 }
 
 return options
