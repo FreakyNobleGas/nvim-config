@@ -3,22 +3,25 @@
 
 -- Scanned one level deep when the workspace has no project.json files
 local FALLBACK_DIRS = { "apps", "libs", "packages", "infra" }
+-- Always scanned one level deep, on top of project.json discovery
+local ALWAYS_DIRS = { "infra" }
 
 local function workspace_root()
   local cwd = vim.fn.getcwd()
   return vim.fs.root(cwd, { "nx.json", ".git" }) or cwd
 end
 
-local function fallback_projects(root)
-  local projects = {}
-  for _, parent in ipairs(FALLBACK_DIRS) do
+-- Directories one level under each parent, skipping hidden ones (.terraform)
+local function list_subdirs(root, parents)
+  local dirs = {}
+  for _, parent in ipairs(parents) do
     for name, kind in vim.fs.dir(root .. "/" .. parent) do
-      if kind == "directory" then
-        table.insert(projects, parent .. "/" .. name)
+      if kind == "directory" and not vim.startswith(name, ".") then
+        table.insert(dirs, parent .. "/" .. name)
       end
     end
   end
-  return projects
+  return dirs
 end
 
 -- Calls cb with a sorted list of project paths relative to root
@@ -38,8 +41,15 @@ local function discover(root, cb)
         end
       end
       vim.schedule(function()
+        local extra = list_subdirs(root, ALWAYS_DIRS)
         if #projects == 0 then
-          projects = fallback_projects(root)
+          vim.list_extend(extra, list_subdirs(root, FALLBACK_DIRS))
+        end
+        for _, dir in ipairs(extra) do
+          if not seen[dir] then
+            seen[dir] = true
+            table.insert(projects, dir)
+          end
         end
         table.sort(projects)
         cb(projects)
